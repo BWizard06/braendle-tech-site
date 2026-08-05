@@ -1,0 +1,92 @@
+---
+import '@fontsource-variable/instrument-sans/wght.css';
+import '@fontsource/instrument-serif/latin-400-italic.css';
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+---
+
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Seite nicht gefunden — Ben Brändle</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      try {
+        var stored = localStorage.getItem('braendle-theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.dataset.theme = stored;
+        }
+      } catch (error) {}
+    </script>
+  </head>
+
+  <body>
+    <div class="corner">
+      <Logo href="/de/" label="Startseite" />
+    </div>
+
+    <main class="lost u-shell">
+      <p class="u-kicker">404</p>
+      <h1>Diese Seite gibt es <em class="accent">nicht</em>.</h1>
+      <p class="lost__body">
+        Vielleicht ein Tippfehler, vielleicht ein alter Link. Das Übrige ist noch da.
+      </p>
+      <p class="lost__body" lang="en">
+        Maybe a typo, maybe an old link. Everything else is still here.
+      </p>
+      <div class="lost__actions">
+        <a class="pill pill--solid" href="/de/">Zur Startseite</a>
+        <a class="pill" href="/en/" lang="en" hreflang="en">English version</a>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  .corner {
+    position: fixed;
+    top: max(var(--space-2xs), env(safe-area-inset-top));
+    left: max(var(--space-2xs), env(safe-area-inset-left));
+  }
+
+  .lost {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100svh;
+    padding-block: var(--space-2xl);
+  }
+
+  .lost h1 {
+    max-width: 20ch;
+    margin-top: var(--space-s);
+    font-size: var(--step-4);
+    font-weight: 600;
+    line-height: var(--leading-tight);
+  }
+
+  .lost__body {
+    max-width: var(--measure);
+    margin-top: var(--space-m);
+    color: var(--fg-muted);
+    text-wrap: pretty;
+  }
+
+  .lost__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-xs);
+    margin-top: var(--space-l);
+  }
+
+  @media (min-width: 48rem) {
+    .corner {
+      top: max(var(--space-s), env(safe-area-inset-top));
+      left: max(var(--space-m), env(safe-area-inset-left));
+    }
+  }
+</style>

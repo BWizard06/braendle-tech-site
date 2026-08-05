@@ -209,6 +209,28 @@ und englischen Texte unterschiedlich lang sind. Zwei Tests halten das fest: die 
 sobald sie live ist) braucht keine Codeänderung — Name, URL, Rolle, Fliesstext, Stichpunkte,
 jeweils DE und EN.
 
+## Sichtbarkeit
+
+`_redirects` ist die einzige Stelle, an der `/` auf `/de/` umgeleitet wird. **Ein statischer
+Astro-Build kann keinen HTTP-Redirect erzeugen** — `Astro.redirect()` fällt dort auf ein
+`<meta http-equiv="refresh">` zurück, und dem folgen LinkedIn, Slack und WhatsApp nicht. Die
+nackte Domain entfaltete sich dadurch als „Redirecting to: /de/". Die Regel wird bei Cloudflare
+Pages vor den statischen Dateien ausgewertet, schlägt also die gebaute `index.html`.
+
+`404.astro` sorgt dafür, dass unbekannte Pfade wirklich 404 liefern. Ohne sie beantwortet Pages
+jeden Tippfehler mit 200 und dem Weiterleitungs-Stub.
+
+Die Link-Vorschau liegt in `Base.astro` (Open Graph, Twitter Card, Person-JSON-LD), das Bild
+erzeugt `npm run bake:og`: 1200×630 aus dem echten Porträt und den echten Schriften, pro Sprache
+eine Datei unter `public/og-<locale>.png`. Es enthält die Hero-Zeile **inklusive Alter** — nach
+einem Geburtstag also einmal neu backen. Kein WebP und kein gehashter Pfad: LinkedIn rendert WebP
+unzuverlässig, und `/_astro/`-Namen ändern sich bei jedem Build.
+
+`tests/e2e/seo.spec.ts` hält das alles fest: die Sitemap aus der robots.txt muss auflösen, die
+Weiterleitung darf nicht in der Sitemap stehen, `og:url` muss dem Canonical entsprechen, das
+OG-Bild muss ausgeliefert werden, das JSON-LD muss parsen, ein unbekannter Pfad muss 404 liefern
+und die Root-Regel muss in `_redirects` stehen.
+
 ## Der Lebenslauf
 
 `lib/cv.ts` löst den Link pro Sprache auf: `/cv-ben-braendle.pdf` für Deutsch,

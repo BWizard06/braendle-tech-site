@@ -22,12 +22,12 @@ export interface Reference {
 
 export const meta = {
   title: {
-    de: 'Ben Brändle, Fullstack Developer',
-    en: 'Ben Brändle, Fullstack Developer',
+    de: 'Ben Brändle, Fullstack Developer in Zürich',
+    en: 'Ben Brändle, fullstack developer near Zurich',
   },
   description: {
-    de: `Ben Brändle, ${AGE}, Fullstack Developer aus Herrliberg bei Zürich. Interface, Backend, Deployment.`,
-    en: `Ben Brändle, ${AGE}, fullstack developer near Zurich, Switzerland. Interface, backend, deployment.`,
+    de: 'Fullstack Developer aus Herrliberg bei Zürich. TypeScript, Vue, Nuxt, React, Astro, Go, Docker und CI/CD. Websites und Web-Apps vom Interface bis zum Server.',
+    en: 'Fullstack developer near Zurich, Switzerland. TypeScript, Vue, Nuxt, React, Astro, Go, Docker and CI/CD. Websites and web apps from the interface to the server.',
   },
   skip: { de: 'Zum Inhalt springen', en: 'Skip to content' },
   home: { de: 'Startseite', en: 'Home' },

@@ -37,6 +37,27 @@ test('the sitemap lists both locales and not the redirect', async ({ request }) 
   ).toBe(false);
 });
 
+test('an unknown path answers 404, not 200', async ({ request }) => {
+  const response = await request.get('/zzz-does-not-exist-1234', { maxRedirects: 0 });
+  expect(response.status(), 'a soft 404 would make every typo look like a real page').toBe(404);
+  expect(await response.text()).toContain('404');
+});
+
+test('the root is redirected by a _redirects rule, not by a meta refresh', async ({ request }) => {
+  const rules = await request.get('/_redirects');
+  expect(rules.status(), '_redirects must reach the deployment').toBe(200);
+
+  const body = await rules.text();
+  const root = body
+    .split('\n')
+    .map((line) => line.trim())
+    .find((line) => line.startsWith('/ ') || line.startsWith('/\t'));
+
+  expect(root, 'the root needs a redirect rule; a static build cannot emit one').toBeDefined();
+  expect(root).toContain('/de/');
+  expect(root, 'social crawlers do not follow meta refresh').toMatch(/\b30[128]\b/);
+});
+
 for (const locale of LOCALES) {
   test(`/${locale}/ carries a complete link preview`, async ({ page, request }) => {
     await page.goto(`/${locale}/`);
