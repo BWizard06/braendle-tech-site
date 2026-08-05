@@ -1,0 +1,89 @@
+---
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { otherLocale, pick, type Locale, type Localized } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  home: Localized;
+  toLight: Localized;
+  toDark: Localized;
+  languageName: Localized;
+}
+
+const { locale, home, toLight, toDark, languageName } = Astro.props;
+const target = otherLocale(locale);
+---
+
+<div class="corner corner--brand">
+  <Logo href={`/${locale}/`} label={pick(home, locale)} />
+</div>
+
+<div class="corner corner--actions">
+  <a
+    class="pill"
+    href={`/${target}/`}
+    lang={target}
+    hreflang={target}
+    aria-label={pick(languageName, target)}
+    data-lang-switch
+  >
+    {target.toUpperCase()}
+  </a>
+  <ThemeToggle toLight={pick(toLight, locale)} toDark={pick(toDark, locale)} />
+</div>
+
+<script>
+  import { rememberAnchor } from '../lib/anchor';
+
+  let bound: HTMLAnchorElement | null = null;
+
+  function setup(): void {
+    const link = document.querySelector<HTMLAnchorElement>('[data-lang-switch]');
+    if (!link || link === bound) return;
+    bound = link;
+    link.addEventListener('click', () => rememberAnchor());
+  }
+
+  document.addEventListener('astro:page-load', setup);
+  if (document.readyState !== 'loading') setup();
+  else document.addEventListener('DOMContentLoaded', setup, { once: true });
+</script>
+
+<style>
+  .corner {
+    position: fixed;
+    z-index: 100;
+    top: max(var(--space-2xs), env(safe-area-inset-top));
+    pointer-events: none;
+  }
+
+  .corner--brand {
+    left: max(var(--space-2xs), env(safe-area-inset-left));
+  }
+
+  .corner--actions {
+    right: max(var(--space-2xs), env(safe-area-inset-right));
+    display: flex;
+    gap: var(--space-2xs);
+  }
+
+  .corner :global(.pill),
+  .corner :global(.logo) {
+    pointer-events: auto;
+  }
+
+  @media (min-width: 48rem) {
+    .corner {
+      top: max(var(--space-s), env(safe-area-inset-top));
+    }
+
+    .corner--brand {
+      left: max(var(--space-m), env(safe-area-inset-left));
+    }
+
+    .corner--actions {
+      right: max(var(--space-m), env(safe-area-inset-right));
+    }
+  }
+</style>

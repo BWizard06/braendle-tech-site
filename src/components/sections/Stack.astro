@@ -1,0 +1,104 @@
+---
+import { pick, type Locale } from '../../lib/i18n';
+import type { StackGroup } from '../../content';
+
+interface Props {
+  locale: Locale;
+  kicker: string;
+  framing: string;
+  groups: StackGroup[];
+}
+
+const { locale, kicker, framing, groups } = Astro.props;
+---
+
+<section class="stack" id="stack" aria-labelledby="stack-title">
+  <div class="u-shell">
+    <header class="stack__head" data-reveal>
+      <h2 class="u-kicker" id="stack-title">{kicker}</h2>
+      <p class="stack__framing">{framing}</p>
+    </header>
+
+    <dl class="stack__list">
+      {
+        groups.map((group) => (
+          <div class="stack__row" data-reveal>
+            <dt class="stack__label">{pick(group.label, locale)}</dt>
+            <dd class="stack__items">
+              {group.items.map((item) => (
+                <span class="stack__item">{item}</span>
+              ))}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  .stack {
+    padding-block: clamp(2.75rem, 5vw, 4rem);
+    border-top: 1px solid var(--rule);
+  }
+
+  .stack__head {
+    max-width: 40rem;
+    margin-bottom: var(--space-l);
+  }
+
+  .stack__framing {
+    margin-top: var(--space-s);
+    font-size: var(--step-1);
+    text-wrap: pretty;
+  }
+
+  .stack__list {
+    display: grid;
+    gap: 0;
+  }
+
+  .stack__row {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-m);
+    border-top: 1px solid var(--rule);
+  }
+
+  .stack__row:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .stack__label {
+    color: var(--fg-muted);
+    font-size: var(--step--1);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .stack__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-m);
+    margin: 0;
+  }
+
+  .stack__item {
+    font-size: var(--step-1);
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  @media (min-width: 48rem) {
+    .stack__row {
+      grid-template-columns: minmax(10rem, 16rem) 1fr;
+      gap: var(--space-m);
+      align-items: baseline;
+    }
+
+    .stack__label {
+      padding-top: 0.35em;
+    }
+  }
+</style>

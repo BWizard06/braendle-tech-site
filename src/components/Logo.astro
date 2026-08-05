@@ -1,0 +1,90 @@
+---
+interface Props {
+  label: string;
+  href: string;
+}
+
+const { label, href } = Astro.props;
+---
+
+<a class="logo" href={href} aria-label={label}>
+  <svg class="logo__mark" viewBox="0 0 32 32" role="presentation" focusable="false">
+    <g
+      class="logo__letter logo__letter--left"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="3"
+      stroke-linecap="butt"
+      stroke-linejoin="miter"
+    >
+      <path d="M4.5 27.5V4.5H9A3.5 3.5 0 0 1 12.5 8V12A3.5 3.5 0 0 1 9 15.5H4.5" />
+      <path d="M9 15.5A3.5 3.5 0 0 1 12.5 19V24A3.5 3.5 0 0 1 9 27.5H4.5" />
+    </g>
+    <g
+      class="logo__letter logo__letter--right"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="3"
+      stroke-linecap="butt"
+      stroke-linejoin="miter"
+    >
+      <path d="M27.5 27.5V4.5H23A3.5 3.5 0 0 0 19.5 8V12A3.5 3.5 0 0 0 23 15.5H27.5" />
+      <path d="M23 15.5A3.5 3.5 0 0 0 19.5 19V24A3.5 3.5 0 0 0 23 27.5H27.5" />
+    </g>
+    <rect class="logo__dot" x="14.5" y="14.5" width="3" height="3" />
+  </svg>
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    padding: 0.4rem;
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .logo__mark {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .logo__letter {
+    transition: transform 0.42s var(--ease-out);
+  }
+
+  .logo__dot {
+    fill: var(--accent);
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    transition: transform 0.42s var(--ease-out);
+  }
+
+  .logo:hover .logo__letter--left,
+  .logo:focus-visible .logo__letter--left {
+    transform: translateX(-0.9px);
+  }
+
+  .logo:hover .logo__letter--right,
+  .logo:focus-visible .logo__letter--right {
+    transform: translateX(0.9px);
+  }
+
+  .logo:hover .logo__dot,
+  .logo:focus-visible .logo__dot {
+    transform: scale(1.45);
+  }
+
+  @media (min-width: 48rem) {
+    .logo__mark {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo__letter,
+    .logo__dot {
+      transition: none;
+    }
+  }
+</style>

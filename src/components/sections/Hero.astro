@@ -1,0 +1,371 @@
+---
+import { getImage } from 'astro:assets';
+import posterDark from '../../assets/hero-poster-dark.png';
+import posterLight from '../../assets/hero-poster-light.png';
+import heroSource from '../../assets/hero-source.png';
+
+interface Props {
+  name: string;
+  lineBefore: string;
+  lineAccent: string;
+  lineAfter: string;
+  intro: string;
+  alt: string;
+}
+
+const { name, lineBefore, lineAccent, lineAfter, intro, alt } = Astro.props;
+
+const sampleSource = await getImage({ src: heroSource, format: 'webp', quality: 92 });
+
+const POSTER_WIDTHS = [360, 540, 720];
+const POSTER_SIZES = '(min-width: 62rem) 30rem, 20rem';
+const posterOptions = { widths: POSTER_WIDTHS, format: 'webp' as const, quality: 72 };
+
+const light = await getImage({ src: posterLight, ...posterOptions });
+const dark = await getImage({ src: posterDark, ...posterOptions });
+---
+
+<section class="hero" id="start" aria-labelledby="hero-name" data-hero>
+  <div class="u-shell hero__inner">
+    <div class="hero__text">
+      <h1 class="hero__name" id="hero-name">{name}</h1>
+      <p class="hero__line">{lineBefore} <em class="accent">{lineAccent}</em>{lineAfter}</p>
+      <p class="hero__intro">{intro}</p>
+      <div class="hero__actions"><slot name="actions" /></div>
+    </div>
+
+    <div class="hero__visual" data-hero-visual data-hero-src={sampleSource.src}>
+      <div class="hero__frame">
+        <picture>
+          <source
+            data-poster-source
+            type="image/webp"
+            media="(prefers-color-scheme: dark)"
+            srcset={dark.srcSet.attribute}
+            sizes={POSTER_SIZES}
+          />
+          <img
+            class="hero__poster"
+            data-hero-poster
+            data-light-src={light.src}
+            data-light-srcset={light.srcSet.attribute}
+            data-dark-src={dark.src}
+            data-dark-srcset={dark.srcSet.attribute}
+            src={light.src}
+            srcset={light.srcSet.attribute}
+            sizes={POSTER_SIZES}
+            width={light.attributes.width}
+            height={light.attributes.height}
+            alt={alt}
+            loading="eager"
+            decoding="sync"
+            fetchpriority="high"
+          />
+        </picture>
+        <div class="hero__canvas" data-hero-canvas aria-hidden="true"></div>
+      </div>
+      <script is:inline>
+        (function () {
+          var img = document.currentScript.parentElement.querySelector('[data-hero-poster]');
+          if (!img) return;
+          var stored = null;
+          try {
+            stored = localStorage.getItem('braendle-theme');
+          } catch (error) {}
+          if (stored !== 'light' && stored !== 'dark') return;
+          var source = img.parentElement.querySelector('[data-poster-source]');
+          if (source) source.remove();
+          img.srcset = stored === 'dark' ? img.dataset.darkSrcset : img.dataset.lightSrcset;
+          img.src = stored === 'dark' ? img.dataset.darkSrc : img.dataset.lightSrc;
+        })();
+      </script>
+    </div>
+  </div>
+</section>
+
+<script>
+  import type { HeroCanvasHandle } from '../islands/HeroCanvas';
+  import { onThemeChange, resolveTheme } from '../../lib/theme';
+
+  const KEEP_ALIVE = '150%';
+
+  let handle: HeroCanvasHandle | null = null;
+  let observer: IntersectionObserver | null = null;
+  let stopTheme: (() => void) | null = null;
+  let detachScroll: (() => void) | null = null;
+  let poster: HTMLImageElement | null = null;
+  let installed: HTMLElement | null = null;
+  let generation = 0;
+  let loading = false;
+  let wanted = false;
+
+  function webglAvailable(): boolean {
+    try {
+      const probe = document.createElement('canvas');
+      const gl = probe.getContext('webgl2') ?? probe.getContext('webgl');
+      if (!gl) return false;
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function skipReason(): string | null {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'reduced-motion';
+    if (!webglAvailable()) return 'no-webgl';
+    return null;
+  }
+
+  function finePointer(): boolean {
+    return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  }
+
+  function unmount(): void {
+    handle?.destroy();
+    handle = null;
+    installed?.removeAttribute('data-hero-ready');
+  }
+
+  function syncPoster(theme: 'light' | 'dark'): void {
+    if (!poster) return;
+    const source = poster.parentElement?.querySelector('[data-poster-source]');
+    source?.remove();
+    const set = theme === 'dark' ? poster.dataset.darkSrcset : poster.dataset.lightSrcset;
+    const src = theme === 'dark' ? poster.dataset.darkSrc : poster.dataset.lightSrc;
+    if (set && poster.srcset !== set) poster.srcset = set;
+    if (src && !poster.src.endsWith(src)) poster.src = src;
+  }
+
+  function teardown(): void {
+    generation += 1;
+    wanted = false;
+    observer?.disconnect();
+    observer = null;
+    stopTheme?.();
+    stopTheme = null;
+    detachScroll?.();
+    detachScroll = null;
+    unmount();
+    installed = null;
+    poster = null;
+  }
+
+  function trackScroll(section: HTMLElement): () => void {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = section.getBoundingClientRect();
+      const travel = rect.height || 1;
+      const progress = Math.min(Math.max(-rect.top / travel, 0), 1);
+      handle?.setScroll(progress);
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    update();
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }
+
+  function want(
+    next: boolean,
+    mount: HTMLElement,
+    section: HTMLElement,
+    frame: HTMLElement,
+    src: string,
+  ): void {
+    wanted = next;
+    if (!next) {
+      if (handle) unmount();
+      return;
+    }
+    if (handle || loading) return;
+
+    loading = true;
+    const gen = generation;
+    void import('../islands/HeroCanvas')
+      .then(({ mountHeroCanvas }) => {
+        loading = false;
+        if (gen !== generation || !wanted || handle) return;
+        const fine = finePointer();
+        handle = mountHeroCanvas(mount, {
+          src,
+          pointerTarget: section,
+          frame,
+          theme: resolveTheme(),
+          ambient: !fine,
+          maxDpr: fine ? 1.5 : 2,
+          onReady: () => installed?.setAttribute('data-hero-ready', 'true'),
+        });
+        detachScroll = trackScroll(section);
+      })
+      .catch((error: unknown) => {
+        loading = false;
+        installed?.setAttribute('data-hero-skip', 'load-failed');
+        console.error('[hero] island failed to load, keeping the poster', error);
+      });
+  }
+
+  function setup(): void {
+    const visual = document.querySelector<HTMLElement>('[data-hero-visual]');
+    if (visual && visual === installed) return;
+
+    teardown();
+    const section = document.querySelector<HTMLElement>('[data-hero]');
+    const mount = visual?.querySelector<HTMLElement>('[data-hero-canvas]');
+    const frame = visual?.querySelector<HTMLElement>('.hero__frame');
+    const src = visual?.dataset.heroSrc;
+
+    poster = visual?.querySelector<HTMLImageElement>('[data-hero-poster]') ?? null;
+    syncPoster(resolveTheme());
+    stopTheme = onThemeChange((theme) => {
+      syncPoster(theme);
+      handle?.setTheme(theme);
+    });
+
+    if (!visual || !section || !mount || !frame || !src) return;
+
+    const skip = skipReason();
+    if (skip) {
+      visual.dataset.heroSkip = skip;
+      return;
+    }
+    delete visual.dataset.heroSkip;
+
+    installed = visual;
+
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) want(entry.isIntersecting, mount, section, frame, src);
+      },
+      { rootMargin: `${KEEP_ALIVE} 0px` },
+    );
+    observer.observe(visual);
+  }
+
+  document.addEventListener('astro:page-load', setup);
+  document.addEventListener('astro:before-swap', teardown);
+
+  if (document.readyState === 'complete') setup();
+  else window.addEventListener('load', setup, { once: true });
+</script>
+
+<style>
+  .hero {
+    display: flex;
+    align-items: flex-start;
+    min-height: 100svh;
+    padding-block: 4rem var(--space-xl);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: var(--space-m);
+    align-items: center;
+  }
+
+  .hero__visual {
+    order: -1;
+    justify-self: center;
+    width: 100%;
+    max-width: 30rem;
+  }
+
+  .hero__frame {
+    --hero-overscan: min(50%, (100vw - 100%) / 2);
+
+    position: relative;
+    aspect-ratio: 1 / 1;
+    inline-size: min(100%, 30rem, 56svh);
+    block-size: auto;
+    margin-inline: auto;
+  }
+
+  .hero__poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: opacity 0.42s var(--ease-out);
+  }
+
+  .hero__canvas {
+    position: absolute;
+    inset: calc(var(--hero-overscan) * -1);
+    opacity: 0;
+    transition: opacity 0.42s var(--ease-out);
+  }
+
+  .hero__visual[data-hero-ready='true'] .hero__poster {
+    opacity: 0;
+  }
+
+  .hero__visual[data-hero-ready='true'] .hero__canvas {
+    opacity: 1;
+  }
+
+  .hero__name {
+    font-size: var(--step-5);
+    font-weight: 600;
+    line-height: var(--leading-tight);
+  }
+
+  .hero__line {
+    margin-top: var(--space-2xs);
+    font-size: var(--step-3);
+    font-weight: 400;
+    line-height: var(--leading-head);
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
+  }
+
+  .hero__intro {
+    max-width: 32rem;
+    margin-top: clamp(2.5rem, 11svh, 5rem);
+    color: var(--fg-muted);
+    text-wrap: pretty;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-xs);
+    margin-top: var(--space-l);
+  }
+
+  @media (min-width: 62rem) {
+    .hero {
+      align-items: center;
+    }
+
+    .hero__intro {
+      margin-top: var(--space-m);
+    }
+
+    .hero__inner {
+      grid-template-columns: minmax(18rem, 30rem) 1fr;
+      gap: var(--space-2xl);
+    }
+
+    .hero__visual {
+      grid-area: 1 / 1;
+      max-width: none;
+    }
+
+    .hero__frame {
+      inline-size: 100%;
+    }
+
+    .hero__text {
+      grid-area: 1 / 2;
+    }
+  }
+</style>

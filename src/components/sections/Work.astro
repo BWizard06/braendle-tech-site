@@ -1,0 +1,130 @@
+---
+import { pick, type Locale } from '../../lib/i18n';
+import type { Reference } from '../../content';
+
+interface Props {
+  locale: Locale;
+  kicker: string;
+  visit: string;
+  references: Reference[];
+}
+
+const { locale, kicker, visit, references } = Astro.props;
+---
+
+<section class="work" id="work" aria-labelledby="work-title">
+  <div class="u-shell">
+    <header class="work__head" data-reveal>
+      <h2 class="u-kicker" id="work-title">{kicker}</h2>
+    </header>
+
+    {
+      references.map((reference) => (
+        <article class="work__item" data-reveal>
+          <div class="work__meta">
+            <h3 class="work__name">{reference.name}</h3>
+            <p class="work__role">{pick(reference.role, locale)}</p>
+            <a class="pill work__visit" href={reference.url} rel="noreferrer noopener" target="_blank">
+              {visit}
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="work__arrow">
+                <path
+                  d="M4 12L12 4M6 4h6v6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+          </div>
+
+          <div class="work__body">
+            <p class="work__lead">{pick(reference.body, locale)}</p>
+            <ul class="work__bullets">
+              {reference.bullets.map((bullet) => (
+                <li>{pick(bullet, locale)}</li>
+              ))}
+            </ul>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .work {
+    padding-block: clamp(2.75rem, 5vw, 4rem);
+    border-top: 1px solid var(--rule);
+  }
+
+  .work__head {
+    max-width: 40rem;
+    margin-bottom: var(--space-l);
+  }
+
+  .work__item {
+    display: grid;
+    gap: var(--space-l);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--rule);
+  }
+
+  .work__name {
+    font-size: var(--step-2);
+  }
+
+  .work__role {
+    margin-top: var(--space-3xs);
+    color: var(--fg-muted);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .work__visit {
+    margin-top: var(--space-m);
+  }
+
+  .work__arrow {
+    width: 0.85em;
+    height: 0.85em;
+  }
+
+  .work__lead {
+    max-width: var(--measure);
+    font-size: var(--step-1);
+    text-wrap: pretty;
+  }
+
+  .work__bullets {
+    max-width: var(--measure);
+    margin-top: var(--space-m);
+    padding: 0;
+    list-style: none;
+  }
+
+  .work__bullets li {
+    padding-block: var(--space-2xs);
+    padding-left: var(--space-m);
+    color: var(--fg-muted);
+    text-indent: calc(var(--space-m) * -1);
+  }
+
+  .work__bullets li::before {
+    content: '';
+    display: inline-block;
+    width: 0.5rem;
+    height: 1px;
+    margin-right: calc(var(--space-m) - 0.5rem);
+    background: var(--accent);
+    vertical-align: 0.4em;
+  }
+
+  @media (min-width: 52rem) {
+    .work__item {
+      grid-template-columns: minmax(14rem, 20rem) 1fr;
+      gap: var(--space-2xl);
+    }
+  }
+</style>

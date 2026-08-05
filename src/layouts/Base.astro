@@ -1,0 +1,131 @@
+---
+import '@fontsource-variable/instrument-sans/wght.css';
+import '@fontsource/instrument-serif/latin-400-italic.css';
+import '../styles/global.css';
+
+import { ClientRouter } from 'astro:transitions';
+import CornerNav from '../components/CornerNav.astro';
+import { LOCALES, type Locale, type Localized } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  skip: string;
+  home: Localized;
+  toLight: Localized;
+  toDark: Localized;
+  languageName: Localized;
+}
+
+const { locale, title, description, skip, home, toLight, toDark, languageName } = Astro.props;
+const localizedPath = (l: Locale): string => `/${l}/`;
+---
+
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={new URL(localizedPath(locale), Astro.site)} />
+    {
+      LOCALES.map((l) => (
+        <link rel="alternate" hreflang={l} href={new URL(localizedPath(l), Astro.site)} />
+      ))
+    }
+    <link rel="alternate" hreflang="x-default" href={new URL(localizedPath('de'), Astro.site)} />
+    <ClientRouter />
+    <script is:inline>
+      (function () {
+        function apply() {
+          try {
+            var stored = localStorage.getItem('braendle-theme');
+            if (stored === 'light' || stored === 'dark') {
+              document.documentElement.dataset.theme = stored;
+            } else {
+              delete document.documentElement.dataset.theme;
+            }
+          } catch (error) {}
+        }
+        apply();
+        if (!window.__braendleThemeBound) {
+          window.__braendleThemeBound = true;
+          document.addEventListener('astro:after-swap', apply);
+        }
+      })();
+    </script>
+    {
+      import.meta.env.DEV && (
+        <script
+          is:inline
+          type="module"
+          set:html={`import RefreshRuntime from "/@react-refresh";
+RefreshRuntime.injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;
+window.__vite_plugin_react_preamble_installed__ = true;`}
+        />
+      )
+    }
+  </head>
+
+  <body>
+    <a class="skip-link" href="#inhalt">{skip}</a>
+
+    <CornerNav
+      locale={locale}
+      home={home}
+      toLight={toLight}
+      toDark={toDark}
+      languageName={languageName}
+    />
+
+    <main id="inhalt">
+      <slot />
+    </main>
+
+    <script>
+      import { restoreAnchor } from '../lib/anchor';
+
+      let revealed: HTMLElement | null = null;
+
+      function reveal(): void {
+        const main = document.querySelector<HTMLElement>('main');
+        if (!main || main === revealed) return;
+        revealed = main;
+
+        const nodes = document.querySelectorAll<HTMLElement>('[data-reveal]');
+        if (!nodes.length) return;
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          nodes.forEach((node) => node.setAttribute('data-reveal', 'shown'));
+          return;
+        }
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.setAttribute('data-reveal', 'shown');
+              observer.unobserve(entry.target);
+            }
+          },
+          { rootMargin: '0px 0px -12% 0px' },
+        );
+
+        nodes.forEach((node) => observer.observe(node));
+      }
+
+      document.addEventListener('astro:after-swap', () => restoreAnchor(true));
+      document.addEventListener('astro:page-load', reveal);
+
+      if (document.readyState !== 'loading') reveal();
+      else document.addEventListener('DOMContentLoaded', reveal, { once: true });
+    </script>
+  </body>
+</html>

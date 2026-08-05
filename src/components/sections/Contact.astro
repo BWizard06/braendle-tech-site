@@ -1,0 +1,94 @@
+---
+import { CONTACT } from '../../content';
+
+interface Props {
+  kicker: string;
+  lead: string;
+  mail: string;
+  linkedin: string;
+  cv: string;
+  cvHref: string;
+  location: string;
+}
+
+const { kicker, lead, mail, linkedin, cv, cvHref, location } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<section class="contact" id="kontakt" aria-labelledby="contact-title">
+  <div class="u-shell">
+    <div class="contact__head" data-reveal>
+      <h2 class="u-kicker" id="contact-title">{kicker}</h2>
+      <p class="contact__lead">{lead}</p>
+      <a class="contact__mail" href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+    </div>
+
+    <div class="contact__actions" data-reveal>
+      <a class="pill pill--solid" href={`mailto:${CONTACT.email}`}>{mail}</a>
+      <a class="pill" href={CONTACT.linkedin} rel="me noreferrer noopener" target="_blank">{linkedin}</a>
+      <a class="pill" href={cvHref} type="application/pdf" target="_blank" rel="noreferrer noopener">{cv}</a>
+    </div>
+
+    <div class="contact__foot">
+      <p>{location}</p>
+      <p class="contact__year">© {year} Ben Brändle</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    padding-block: clamp(2.75rem, 5vw, 4rem);
+    border-top: 1px solid var(--rule);
+  }
+
+  .contact__head {
+    max-width: 40rem;
+  }
+
+  .contact__lead {
+    margin-top: var(--space-s);
+    font-size: var(--step-1);
+    text-wrap: pretty;
+  }
+
+  .contact__mail {
+    display: inline-block;
+    margin-top: var(--space-m);
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+    text-decoration-color: var(--rule);
+    word-break: break-word;
+  }
+
+  .contact__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-xs);
+    margin-top: var(--space-l);
+  }
+
+  .contact__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-s);
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: var(--space-xl);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--rule);
+    color: var(--fg-muted);
+    font-size: var(--step--1);
+  }
+
+  .contact__year {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 30rem) {
+    .contact__foot {
+      column-gap: var(--space-l);
+    }
+  }
+</style>

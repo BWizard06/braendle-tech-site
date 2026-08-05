@@ -1,0 +1,72 @@
+---
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/sections/Hero.astro';
+import Stack from '../../components/sections/Stack.astro';
+import Work from '../../components/sections/Work.astro';
+import Contact from '../../components/sections/Contact.astro';
+import { CONTACT, contact, hero, meta, stack, work } from '../../content';
+import { DEFAULT_LOCALE, LOCALES, isLocale, pick, type Locale } from '../../lib/i18n';
+import { cvHref } from '../../lib/cv';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const raw = Astro.params.lang ?? '';
+const locale: Locale = isLocale(raw) ? raw : DEFAULT_LOCALE;
+const cv = cvHref(locale);
+---
+
+<Base
+  locale={locale}
+  title={pick(meta.title, locale)}
+  description={pick(meta.description, locale)}
+  skip={pick(meta.skip, locale)}
+  home={meta.home}
+  toLight={meta.toLight}
+  toDark={meta.toDark}
+  languageName={meta.languageName}
+>
+  <Hero
+    name={hero.name}
+    lineBefore={pick(hero.lineBefore, locale)}
+    lineAccent={pick(hero.lineAccent, locale)}
+    lineAfter={pick(hero.lineAfter, locale)}
+    intro={pick(hero.intro, locale)}
+    alt={pick(hero.alt, locale)}
+  >
+    <Fragment slot="actions">
+      <a class="pill pill--solid" href={`mailto:${CONTACT.email}`}>{pick(contact.mail, locale)}</a>
+      <a class="pill" href={cv} type="application/pdf" target="_blank" rel="noreferrer noopener">
+        {pick(contact.cv, locale)}
+      </a>
+      <a class="pill" href={CONTACT.linkedin} rel="me noreferrer noopener" target="_blank">
+        {pick(contact.linkedin, locale)}
+      </a>
+    </Fragment>
+  </Hero>
+
+  <Stack
+    locale={locale}
+    kicker={pick(stack.kicker, locale)}
+    framing={pick(stack.framing, locale)}
+    groups={stack.groups}
+  />
+
+  <Work
+    locale={locale}
+    kicker={pick(work.kicker, locale)}
+    visit={pick(work.visit, locale)}
+    references={work.references}
+  />
+
+  <Contact
+    kicker={pick(contact.kicker, locale)}
+    lead={pick(contact.lead, locale)}
+    mail={pick(contact.mail, locale)}
+    linkedin={pick(contact.linkedin, locale)}
+    cv={pick(contact.cv, locale)}
+    cvHref={cv}
+    location={pick(contact.location, locale)}
+  />
+</Base>
