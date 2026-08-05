@@ -220,9 +220,9 @@ Datei, wird der Build rot statt heimlich falsch.
 
 ## Offen
 
-- **Deployment:** Cloudflare Worker mit Static Assets, Schritt für Schritt in
-  [DEPLOY.md](DEPLOY.md). `wrangler.jsonc` muss im Repo bleiben. Der Build ist statisch, `dist/`
-  läuft aber auf jedem Host.
+- **Deployment:** Cloudflare Pages mit Git-Anbindung, Schritt für Schritt in
+  [DEPLOY.md](DEPLOY.md). Bewusst **ohne** wrangler-Konfiguration im Repo. Der Build ist statisch,
+  `dist/` läuft aber auf jedem Host.
 - `public/cv-ben-braendle.pdf` ist die sanitisierte Fassung ohne Adresse und Telefonnummer. Das
   **Geburtsdatum steht noch drin**, bewusste Entscheidung, Stand 2026-08-05.
 - Beide Lebensläufe liegen im Repo und sind damit öffentlich, bewusste Entscheidung.

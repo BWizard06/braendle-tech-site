@@ -1,8 +1,0 @@
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "braendle-tech-site",
-  "compatibility_date": "2026-08-05",
-  "assets": {
-    "directory": "./dist"
-  }
-}
