@@ -212,15 +212,17 @@ jeweils DE und EN.
 ## Der Lebenslauf
 
 `lib/cv.ts` löst den Link pro Sprache auf: `/cv-ben-braendle.pdf` für Deutsch,
-`/cv-ben-braendle-en.pdf` für Englisch. **Existiert die englische Datei nicht, fällt der Link zur
-Buildzeit auf die deutsche zurück** — es gibt also nie einen 404, und sobald die Datei in `public/`
-liegt, greift sie beim nächsten Build von selbst. Ein Test lädt für beide Sprachen die verlinkte
-URL und verlangt Status 200 mit einem PDF-Content-Type.
+`/cv-ben-braendle-en.pdf` für Englisch. Eine reine Zuordnung, **kein Zugriff auf das Dateisystem**:
+`node:fs` gibt es in der Workers-Laufzeit nicht, und sobald der Cloudflare-Adapter im Spiel ist,
+läuft das Prerendering genau dort. Statt eines stillen Rückfalls auf die deutsche Fassung lädt ein
+Test für beide Sprachen die verlinkte URL und verlangt Status 200 mit PDF-Content-Type: fehlt eine
+Datei, wird der Build rot statt heimlich falsch.
 
 ## Offen
 
-- **Deployment:** Cloudflare Pages, Schritt für Schritt in [DEPLOY.md](DEPLOY.md). Der Build ist
-  statisch, `dist/` läuft aber auf jedem Host.
+- **Deployment:** Cloudflare Worker mit Static Assets, Schritt für Schritt in
+  [DEPLOY.md](DEPLOY.md). `wrangler.jsonc` muss im Repo bleiben. Der Build ist statisch, `dist/`
+  läuft aber auf jedem Host.
 - `public/cv-ben-braendle.pdf` ist die sanitisierte Fassung ohne Adresse und Telefonnummer. Das
   **Geburtsdatum steht noch drin**, bewusste Entscheidung, Stand 2026-08-05.
 - Beide Lebensläufe liegen im Repo und sind damit öffentlich, bewusste Entscheidung.

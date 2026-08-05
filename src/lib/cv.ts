@@ -1,5 +1,3 @@
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import type { Locale } from './i18n';
 
 const FILES: Record<Locale, string> = {
@@ -8,6 +6,5 @@ const FILES: Record<Locale, string> = {
 };
 
 export function cvHref(locale: Locale): string {
-  const wanted = FILES[locale];
-  return existsSync(resolve(process.cwd(), `public${wanted}`)) ? wanted : FILES.de;
+  return FILES[locale];
 }
