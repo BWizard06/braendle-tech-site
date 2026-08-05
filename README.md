@@ -219,12 +219,12 @@ URL und verlangt Status 200 mit einem PDF-Content-Type.
 
 ## Offen
 
-- **Deployment ist bewusst nicht eingerichtet.** Der Build ist statisch, `dist/` läuft auf jedem
-  Host.
+- **Deployment:** Cloudflare Pages, Schritt für Schritt in [DEPLOY.md](DEPLOY.md). Der Build ist
+  statisch, `dist/` läuft aber auf jedem Host.
 - `public/cv-ben-braendle.pdf` ist die sanitisierte Fassung ohne Adresse und Telefonnummer. Das
   **Geburtsdatum steht noch drin**, bewusste Entscheidung, Stand 2026-08-05.
-- **`public/cv-ben-braendle-en.pdf` fehlt noch.** Bis die Datei da ist, zeigt die englische Seite
-  den deutschen Lebenslauf.
+- Beide Lebensläufe liegen im Repo und sind damit öffentlich, bewusste Entscheidung.
+  `lib/cv.ts` fällt automatisch auf die deutsche Fassung zurück, falls eine Sprachvariante fehlt.
 - Kein Impressum: die Seite ist ein One-Pager ohne Unterseiten.
 - Ein Kontaktformular ist vorgesehen, aber nicht gebaut. Der Kontaktblock ist so aufgebaut, dass
   eines darunter passt, ohne den Rest anzufassen.

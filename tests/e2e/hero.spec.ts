@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { inkSpread } from './spread';
+import { inkCoverage } from './spread';
 
 const VISUAL = '[data-hero-visual]';
 const CANVAS = '[data-hero-canvas] canvas';
@@ -95,45 +95,49 @@ test('the burst drifts out slowly, holds, then snaps back', async ({ page }) => 
   await page.setViewportSize({ width: 420, height: 900 });
   await heroReady(page);
 
-  const canvasBox = (await page.locator('[data-hero-canvas]').boundingBox())!;
-  const clip = {
-    x: Math.max(0, canvasBox.x),
-    y: Math.max(0, canvasBox.y),
-    width: Math.min(canvasBox.width, 420 - Math.max(0, canvasBox.x)),
-    height: Math.min(canvasBox.height, 900 - Math.max(0, canvasBox.y)),
-  };
   const box = (await page.locator('.hero__frame').boundingBox())!;
+  const clip = {
+    x: Math.round(box.x),
+    y: Math.round(box.y),
+    width: Math.round(box.width),
+    height: Math.round(box.height),
+  };
   const away = { x: 5, y: 880 };
 
   await page.mouse.move(away.x, away.y);
   await page.waitForTimeout(800);
-  const rest = await inkSpread(await page.screenshot({ clip }));
+  const rest = await inkCoverage(await page.screenshot({ clip }));
 
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.move(away.x, away.y);
   const started = Date.now();
 
-  const sampleAt = async (ms: number): Promise<number> => {
-    const wait = ms - (Date.now() - started);
-    if (wait > 0) await page.waitForTimeout(wait);
-    return inkSpread(await page.screenshot({ clip }));
-  };
+  const series: Array<{ at: number; value: number }> = [];
+  while (Date.now() - started < 2400) {
+    const at = Date.now() - started;
+    series.push({ at, value: await inkCoverage(await page.screenshot({ clip })) });
+  }
 
-  const early = await sampleAt(300);
-  const peak = await sampleAt(1000);
-  const held = await sampleAt(1250);
-  const settled = await sampleAt(2200);
+  const peak = Math.max(...series.map((s) => s.value));
+  const amplitude = peak - rest;
+  expect(amplitude, 'the click should visibly open the field').toBeGreaterThan(0.08);
 
-  const grow = (value: number) => value - rest;
+  const openLevel = rest + amplitude * 0.75;
+  const homeLevel = rest + amplitude * 0.15;
+  const open = series.filter((s) => s.value >= openLevel);
+  expect(open.length, 'the field should reach its open state').toBeGreaterThan(0);
 
-  expect(grow(peak), 'the field should be wide open by the end of the drift').toBeGreaterThan(0.08);
-  expect(grow(early), 'early on the field should be nowhere near open').toBeLessThan(
-    grow(peak) * 0.6,
-  );
-  expect(grow(held), 'the field should still be open through the hold').toBeGreaterThan(
-    grow(peak) * 0.85,
-  );
-  expect(grow(settled), 'the field should be home again').toBeLessThan(0.02);
+  const openedAt = open[0]!.at;
+  const closedAt = open[open.length - 1]!.at;
+  const home = series.find((s) => s.at > closedAt && s.value <= homeLevel);
+  expect(home, 'the field should come back on its own').toBeDefined();
+
+  expect(openedAt, 'opening must not be instant').toBeGreaterThan(250);
+  expect(closedAt - openedAt, 'the field should dwell while it is open').toBeGreaterThan(300);
+  expect(
+    home!.at - closedAt,
+    'the way back must be clearly quicker than the way out',
+  ).toBeLessThan(openedAt * 0.9);
 });
 
 test('the field is perfectly still on a desktop until the pointer arrives', async ({ page }) => {
