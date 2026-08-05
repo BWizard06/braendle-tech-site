@@ -4,7 +4,16 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://braendle.tech',
-  integrations: [react(), sitemap()],
+  integrations: [
+    react(),
+    sitemap({
+      filter: (page) => new URL(page).pathname !== '/',
+      i18n: {
+        defaultLocale: 'de',
+        locales: { de: 'de', en: 'en' },
+      },
+    }),
+  ],
   i18n: {
     defaultLocale: 'de',
     locales: ['de', 'en'],

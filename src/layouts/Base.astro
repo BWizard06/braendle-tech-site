@@ -5,7 +5,8 @@ import '../styles/global.css';
 
 import { ClientRouter } from 'astro:transitions';
 import CornerNav from '../components/CornerNav.astro';
-import { LOCALES, type Locale, type Localized } from '../lib/i18n';
+import { CONTACT, hero } from '../content';
+import { LOCALES, otherLocale, pick, type Locale, type Localized } from '../lib/i18n';
 
 interface Props {
   locale: Locale;
@@ -20,6 +21,29 @@ interface Props {
 
 const { locale, title, description, skip, home, toLight, toDark, languageName } = Astro.props;
 const localizedPath = (l: Locale): string => `/${l}/`;
+
+const OG_LOCALES: Record<Locale, string> = { de: 'de_CH', en: 'en_GB' };
+
+const canonical = new URL(localizedPath(locale), Astro.site);
+const ogImage = new URL(`/og-${locale}.png`, Astro.site);
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: hero.name,
+  url: canonical.href,
+  image: ogImage.href,
+  jobTitle: locale === 'de' ? 'Fullstack Developer' : 'Fullstack developer',
+  email: `mailto:${CONTACT.email}`,
+  sameAs: [CONTACT.linkedin],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Herrliberg',
+    addressRegion: 'Zürich',
+    addressCountry: 'CH',
+  },
+  knowsLanguage: ['de', 'en'],
+};
 ---
 
 <html lang={locale}>
@@ -32,7 +56,30 @@ const localizedPath = (l: Locale): string => `/${l}/`;
     <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="canonical" href={new URL(localizedPath(locale), Astro.site)} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content={hero.name} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={pick(hero.alt, locale)} />
+    <meta property="og:locale" content={OG_LOCALES[locale]} />
+    <meta property="og:locale:alternate" content={OG_LOCALES[otherLocale(locale)]} />
+    <meta property="profile:first_name" content="Ben" />
+    <meta property="profile:last_name" content="Brändle" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={pick(hero.alt, locale)} />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(person)} />
     {
       LOCALES.map((l) => (
         <link rel="alternate" hreflang={l} href={new URL(localizedPath(l), Astro.site)} />
