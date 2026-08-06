@@ -85,7 +85,7 @@ export const stack = {
 };
 
 export const work = {
-  kicker: { de: 'Projekt', en: 'Project' },
+  kicker: { de: 'Projekte', en: 'Projects' },
   intro: {
     de: 'Ein Projekt, Gesamtverantwortung von der Analyse bis zur Liveschaltung.',
     en: 'One project I owned on my own, from the first analysis through to go-live.',
@@ -100,8 +100,8 @@ export const work = {
         en: 'Company website relaunch, August to November 2025, live since 11/2025',
       },
       body: {
-        de: 'Kompletter Relaunch: von der Analyse der bestehenden Seite über Konzept und Gestaltung bis zu Umsetzung, Test und Liveschaltung. Ich war allein auf dem Projekt und für Beratung, Gestaltung und Entwicklung zuständig.',
-        en: 'A complete relaunch: from analysing the existing site through concept and design to build, testing and go-live. I was alone on the project and responsible for consulting, design and development.',
+        de: 'Kompletter Relaunch: von der Analyse der bestehenden Seite über Konzept und Gestaltung bis zu Umsetzung, Test und Liveschaltung.',
+        en: 'A complete relaunch: from analysing the existing site through concept and design to build, testing and go-live.',
       },
       bullets: [
         {
@@ -109,11 +109,11 @@ export const work = {
           en: 'Analysed the existing site and named the weak points in structure, content and user guidance.',
         },
         {
-          de: 'Ziele, Zielgruppen und Anforderungen im direkten Gespräch mit dem Kunden erhoben und in konkrete Vorgaben übersetzt.',
-          en: 'Collected goals, audiences and requirements in direct conversation with the client and turned them into concrete specifications.',
+          de: 'Ziele, Zielgruppen und Anforderungen erhoben und in konkrete Anforderungen übersetzt.',
+          en: 'Collected goals, audiences and requirements were identified and translated into specific requirements.',
         },
         {
-          de: 'Gestaltung und Informationsarchitektur entwickelt und über mehrere Feedbackrunden geschärft.',
+          de: 'Design und Informationsarchitektur entwickelt und über mehrere Feedbackrunden geschärft.',
           en: 'Developed the design and information architecture, then sharpened both over several rounds of feedback.',
         },
         {
@@ -128,8 +128,8 @@ export const work = {
 export const contact = {
   kicker: { de: 'Kontakt', en: 'Contact' },
   lead: {
-    de: 'Für Projekte, Kooperationen, berufgliche Anfragen oder allgemeine Fragen: am schnellsten per E-Mail.',
-    en: 'For projects, collaborations, professional inquiries, or general questions: the fastest way to reach us is by email.',
+    de: 'Projekte, Kooperationen oder berufliche Anfragen: am schnellsten per E-Mail.',
+    en: 'Projects, collaborations, or job inquiries: the fastest way to reach us is by email.',
   },
   mail: { de: 'E-Mail Kontakt', en: 'E-Mail Contact' },
   linkedin: { de: 'LinkedIn', en: 'LinkedIn' },
