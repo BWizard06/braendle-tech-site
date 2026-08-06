@@ -41,12 +41,12 @@ export const hero = {
   lineBefore: { de: `${AGE} Jahre alt,`, en: `${AGE} years old,` },
   lineAccent: { de: 'Fullstack', en: 'fullstack' },
   lineAfter: {
-    de: ' Developer aus Herrliberg bei Zürich.',
-    en: ' developer near Zurich, Switzerland.',
+    de: ' Developer',
+    en: ' developer',
   },
   intro: {
-    de: 'Ich baue Websites und Web-Apps: vom Interface über das Backend bis zum Server, auf dem sie laufen. Ausgebildet an der Informatikmittelschule, danach Entwickler bei der Digio AG.',
-    en: 'I build websites and web apps: from the interface through the backend to the server they run on. Trained at the Informatikmittelschule, then a developer at Digio AG.',
+    de: 'Ich entwickle Websites und Web-Apps von der Benutzerobefläche über das Backend bis hin zum Betrieb auf der Serverinfrastruktur. Abgeschlossene Informatikmittelschule in Zürich, Berufserfahrung als Softwareentwickler.',
+    en: 'I develop websites and web apps, from the user interface to the backend and on to deployment on the server infrastructure. I graduated from a secondary school specializing in computer science in Zurich and have professional experience as a software developer.',
   },
   alt: {
     de: 'Ben Brändle, ein Porträt aus einzelnen Partikeln gezeichnet',
@@ -55,7 +55,7 @@ export const hero = {
 } satisfies Record<string, string | Localized>;
 
 export const stack = {
-  kicker: { de: 'Womit ich arbeite', en: 'What I work with' },
+  kicker: { de: 'Technologien ', en: 'Technologies' },
   framing: {
     de: 'Am stärksten im TypeScript-Umfeld mit unterschiedlichen Frameworks. Go als Hauptsprache im Backend.',
     en: 'Strongest in the TypeScript world, across different frameworks. Go as my main backend language.',
@@ -85,7 +85,7 @@ export const stack = {
 };
 
 export const work = {
-  kicker: { de: 'Referenz', en: 'Reference' },
+  kicker: { de: 'Projekt', en: 'Project' },
   intro: {
     de: 'Ein Projekt, Gesamtverantwortung von der Analyse bis zur Liveschaltung.',
     en: 'One project I owned on my own, from the first analysis through to go-live.',
@@ -128,8 +128,8 @@ export const work = {
 export const contact = {
   kicker: { de: 'Kontakt', en: 'Contact' },
   lead: {
-    de: 'Für ein Projekt, eine Zusammenarbeit oder eine konkrete Frage: am schnellsten per E-Mail.',
-    en: 'For a project, a collaboration or a specific question, email is the fastest way.',
+    de: 'Für Projekte, Kooperationen, berufgliche Anfragen oder allgemeine Fragen: am schnellsten per E-Mail.',
+    en: 'For projects, collaborations, professional inquiries, or general questions: the fastest way to reach us is by email.',
   },
   mail: { de: 'E-Mail Kontakt', en: 'E-Mail Contact' },
   linkedin: { de: 'LinkedIn', en: 'LinkedIn' },
