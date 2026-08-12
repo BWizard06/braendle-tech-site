@@ -78,7 +78,7 @@ export const stack = {
       items: ['Claude Code', 'ChatGPT', 'OpenRouter', 'Higgsfield AI', 'Lumo AI'],
     },
     {
-      label: { de: 'Entwurf', en: 'Design' },
+      label: { de: 'Design', en: 'Design' },
       items: ['Figma'],
     },
   ] satisfies StackGroup[],
