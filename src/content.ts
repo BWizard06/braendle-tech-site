@@ -129,7 +129,7 @@ export const contact = {
   kicker: { de: 'Kontakt', en: 'Contact' },
   lead: {
     de: 'Projekte, Kooperationen oder berufliche Anfragen: am schnellsten per E-Mail.',
-    en: 'Projects, collaborations, or job inquiries: the fastest way to reach us is by email.',
+    en: 'Projects, collaborations, or job inquiries: the fastest way to reach me is by email.',
   },
   mail: { de: 'E-Mail Kontakt', en: 'E-Mail Contact' },
   linkedin: { de: 'LinkedIn', en: 'LinkedIn' },
