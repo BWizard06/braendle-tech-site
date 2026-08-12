@@ -75,7 +75,7 @@ export const stack = {
     },
     {
       label: { de: 'KI', en: 'AI' },
-      items: ['Claude', 'Claude Code', 'ChatGPT', 'Higgsfield AI'],
+      items: ['Claude Code', 'ChatGPT', 'OpenRouter', 'Higgsfield AI', 'Lumo AI'],
     },
     {
       label: { de: 'Entwurf', en: 'Design' },
