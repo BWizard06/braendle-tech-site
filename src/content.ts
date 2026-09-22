@@ -46,7 +46,7 @@ export const hero = {
     en: ' developer',
   },
   intro: {
-    de: 'Ich entwickle Websites und Web-Apps von der Benutzerobefläche über das Backend bis hin zum Betrieb auf der Serverinfrastruktur. Abgeschlossene Informatikmittelschule in Zürich, Berufserfahrung als Softwareentwickler.',
+    de: 'Ich entwickle Websites und Web-Apps von der Benutzeroberfläche über das Backend bis hin zum Betrieb auf der Serverinfrastruktur. Abgeschlossene Informatikmittelschule in Zürich, Berufserfahrung als Softwareentwickler.',
     en: 'I develop websites and web apps, from the user interface to the backend and on to deployment on the server infrastructure. I graduated from a secondary school specializing in computer science in Zurich and have professional experience as a software developer.',
   },
   alt: {
@@ -56,7 +56,7 @@ export const hero = {
 } satisfies Record<string, string | Localized>;
 
 export const stack = {
-  kicker: { de: 'Technologien ', en: 'Technologies' },
+  kicker: { de: 'Technologien', en: 'Technologies' },
   framing: {
     de: 'Am stärksten im TypeScript-Umfeld mit unterschiedlichen Frameworks. Go als Hauptsprache im Backend.',
     en: 'Strongest in the TypeScript world, across different frameworks. Go as my main backend language.',
@@ -113,7 +113,7 @@ export const work = {
         },
         {
           de: 'Ziele, Zielgruppen und Anforderungen erhoben und in konkrete Anforderungen übersetzt.',
-          en: 'Collected goals, audiences and requirements were identified and translated into specific requirements.',
+          en: 'Gathered goals, audiences and requirements and translated them into specific requirements.',
         },
         {
           de: 'Design und Informationsarchitektur entwickelt und über mehrere Feedbackrunden geschärft.',
