@@ -6,10 +6,17 @@ interface Props {
   locale: Locale;
   kicker: string;
   visit: string;
+  source: string;
   references: Reference[];
 }
 
-const { locale, kicker, visit, references } = Astro.props;
+const { locale, kicker, visit, source, references } = Astro.props;
+
+const linksOf = (reference: Reference) =>
+  [
+    { href: reference.url, label: visit, kind: 'site' },
+    ...(reference.source ? [{ href: reference.source, label: source, kind: 'source' }] : []),
+  ] as const;
 ---
 
 <section class="work" id="work" aria-labelledby="work-title">
@@ -24,19 +31,29 @@ const { locale, kicker, visit, references } = Astro.props;
           <div class="work__meta">
             <h3 class="work__name">{reference.name}</h3>
             <p class="work__role">{pick(reference.role, locale)}</p>
-            <a class="pill work__visit" href={reference.url} rel="noreferrer noopener" target="_blank">
-              {visit}
-              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="work__arrow">
-                <path
-                  d="M4 12L12 4M6 4h6v6"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </a>
+            <div class="work__links">
+              {linksOf(reference).map((link) => (
+                <a
+                  class="pill"
+                  href={link.href}
+                  rel="noreferrer noopener"
+                  target="_blank"
+                  data-work-link={link.kind}
+                >
+                  {link.label}
+                  <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="work__arrow">
+                    <path
+                      d="M4 12L12 4M6 4h6v6"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </a>
+              ))}
+            </div>
           </div>
 
           <div class="work__body">
@@ -82,7 +99,10 @@ const { locale, kicker, visit, references } = Astro.props;
     font-variant-numeric: tabular-nums;
   }
 
-  .work__visit {
+  .work__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
     margin-top: var(--space-m);
   }
 
@@ -123,7 +143,7 @@ const { locale, kicker, visit, references } = Astro.props;
 
   @media (min-width: 52rem) {
     .work__item {
-      grid-template-columns: minmax(14rem, 20rem) 1fr;
+      grid-template-columns: minmax(14rem, 22rem) 1fr;
       gap: var(--space-2xl);
     }
   }

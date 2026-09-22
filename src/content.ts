@@ -15,6 +15,7 @@ export interface StackGroup {
 export interface Reference {
   name: string;
   url: string;
+  source?: string;
   role: Localized;
   body: Localized;
   bullets: Localized[];
@@ -91,10 +92,12 @@ export const work = {
     en: 'One project I owned on my own, from the first analysis through to go-live.',
   },
   visit: { de: 'Website ansehen', en: 'Visit the site' },
+  source: { de: 'Code auf GitHub', en: 'Code on GitHub' },
   references: [
     {
       name: 'CoRelation GmbH',
       url: 'https://corelation.ch/',
+      source: 'https://github.com/BWizard06/corelation',
       role: {
         de: 'Relaunch der Firmenwebsite, 08/2025 bis 11/2025, live seit 11/2025',
         en: 'Company website relaunch, August to November 2025, live since 11/2025',

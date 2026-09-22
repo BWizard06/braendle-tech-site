@@ -194,3 +194,25 @@ test('the chosen theme survives a language switch', async ({ page }) => {
 
   expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe(chosen);
 });
+
+for (const [locale, visit, source] of [
+  ['de', 'Website ansehen', 'Code auf GitHub'],
+  ['en', 'Visit the site', 'Code on GitHub'],
+] as const) {
+  test(`/${locale}/ links the reference to its site and its code`, async ({ page }) => {
+    await page.goto(`/${locale}/`);
+
+    const site = page.locator('#work [data-work-link="site"]');
+    const code = page.locator('#work [data-work-link="source"]');
+
+    await expect(site).toHaveAttribute('href', 'https://corelation.ch/');
+    await expect(site).toContainText(visit);
+    await expect(code).toHaveAttribute('href', 'https://github.com/BWizard06/corelation');
+    await expect(code).toContainText(source);
+
+    for (const link of [site, code]) {
+      await expect(link).toHaveAttribute('target', '_blank');
+      await expect(link).toHaveAttribute('rel', /noopener/);
+    }
+  });
+}
