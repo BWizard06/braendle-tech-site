@@ -1,6 +1,6 @@
 ---
 import { pick, type Locale } from '../../lib/i18n';
-import type { Reference } from '../../content';
+import { personalProjects, projectCategories, type Reference } from '../../content';
 
 interface Props {
   locale: Locale;
@@ -14,9 +14,14 @@ const { locale, kicker, visit, source, references } = Astro.props;
 
 const linksOf = (reference: Reference) =>
   [
-    { href: reference.url, label: visit, kind: 'site' },
+    { href: reference.url, label: reference.visitLabel ? pick(reference.visitLabel, locale) : visit, kind: 'site' },
     ...(reference.source ? [{ href: reference.source, label: source, kind: 'source' }] : []),
   ] as const;
+
+const groups = [
+  { id: 'client-projects', label: projectCategories.client, projects: references },
+  { id: 'personal-projects', label: projectCategories.personal, projects: personalProjects },
+];
 ---
 
 <section class="work" id="work" aria-labelledby="work-title">
@@ -25,11 +30,29 @@ const linksOf = (reference: Reference) =>
       <h2 class="u-kicker" id="work-title">{kicker}</h2>
     </header>
 
-    {
-      references.map((reference) => (
-        <article class="work__item" data-reveal>
+    {groups.map((group) => (
+      <section class="work__group" aria-labelledby={group.id}>
+        <h3 class="work__category" id={group.id}>{pick(group.label, locale)}</h3>
+        {group.projects.map((reference) => (
+        <article class="work__item" id={`project-${reference.id}`} data-reveal>
           <div class="work__meta">
-            <h3 class="work__name">{reference.name}</h3>
+            <a
+              class="work__preview"
+              href={reference.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label={`${reference.name} – ${reference.visitLabel ? pick(reference.visitLabel, locale) : visit}`}
+            >
+              <img
+                src={reference.image}
+                alt={pick(reference.alt, locale)}
+                width={reference.imageWidth}
+                height={reference.imageHeight}
+                loading="lazy"
+                decoding="async"
+              />
+            </a>
+            <h4 class="work__name">{reference.name}</h4>
             <p class="work__role">{pick(reference.role, locale)}</p>
             <div class="work__links">
               {linksOf(reference).map((link) => (
@@ -58,15 +81,20 @@ const linksOf = (reference: Reference) =>
 
           <div class="work__body">
             <p class="work__lead">{pick(reference.body, locale)}</p>
-            <ul class="work__bullets">
+            {reference.bullets.length > 0 && <ul class="work__bullets">
               {reference.bullets.map((bullet) => (
                 <li>{pick(bullet, locale)}</li>
               ))}
-            </ul>
+            </ul>}
+            {reference.tags && <ul class="work__tags">
+              {reference.tags.map((tag) => <li>{tag}</li>)}
+            </ul>}
+            {reference.note && <p class="work__note">{pick(reference.note, locale)}</p>}
           </div>
         </article>
-      ))
-    }
+        ))}
+      </section>
+    ))}
   </div>
 </section>
 
@@ -79,6 +107,55 @@ const linksOf = (reference: Reference) =>
   .work__head {
     max-width: 40rem;
     margin-bottom: var(--space-l);
+  }
+
+  .work__group + .work__group {
+    margin-top: var(--space-2xl);
+  }
+
+  .work__category {
+    margin-bottom: var(--space-m);
+    font-size: var(--step-0);
+    font-weight: 500;
+  }
+
+  .work__item + .work__item {
+    margin-top: var(--space-xl);
+  }
+
+  .work__preview {
+    display: block;
+    overflow: hidden;
+    margin-bottom: var(--space-m);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--bg);
+    aspect-ratio: 16 / 9;
+  }
+
+  .work__preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .work__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-s);
+    margin: var(--space-m) 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--fg-muted);
+    font-size: var(--step--1);
+  }
+
+  .work__note {
+    margin-top: var(--space-m);
+    max-width: var(--measure);
+    color: var(--fg-muted);
+    font-size: var(--step--1);
   }
 
   .work__item {

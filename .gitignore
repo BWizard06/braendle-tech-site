@@ -29,3 +29,7 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Private references and local previews never belong in the repository.
+references/
+.work/

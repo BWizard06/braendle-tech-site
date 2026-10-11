@@ -199,20 +199,38 @@ for (const [locale, visit, source] of [
   ['de', 'Website ansehen', 'Code auf GitHub'],
   ['en', 'Visit the site', 'Code on GitHub'],
 ] as const) {
-  test(`/${locale}/ links the reference to its site and its code`, async ({ page }) => {
+  test(`/${locale}/ links each project preview to its website and keeps code separate`, async ({ page, request }) => {
     await page.goto(`/${locale}/`);
 
-    const site = page.locator('#work [data-work-link="site"]');
-    const code = page.locator('#work [data-work-link="source"]');
+    for (const [id, website, repository] of [
+      ['corelation', 'https://corelation.ch/', 'https://github.com/BWizard06/corelation'],
+      ['kati-schepis', 'https://fengshui.k-schepis.workers.dev/', 'https://github.com/BWizard06/fengshui'],
+      ['daytona', 'https://daytona.braendle.tech/', 'https://github.com/BWizard06/daytona-experience'],
+    ]) {
+      const project = page.locator(`#project-${id}`);
+      const site = project.locator('[data-work-link="site"]');
+      const code = project.locator('[data-work-link="source"]');
+      const preview = project.locator('.work__preview');
+      await expect(site).toHaveAttribute('href', website);
+      await expect(preview).toHaveAttribute('href', website);
+      await expect(site).toContainText(id === 'kati-schepis' ? (locale === 'de' ? 'Vorschau ansehen' : 'View preview') : visit);
+      await expect(code).toHaveAttribute('href', repository);
+      await expect(code).toContainText(source);
 
-    await expect(site).toHaveAttribute('href', 'https://corelation.ch/');
-    await expect(site).toContainText(visit);
-    await expect(code).toHaveAttribute('href', 'https://github.com/BWizard06/corelation');
-    await expect(code).toContainText(source);
-
-    for (const link of [site, code]) {
-      await expect(link).toHaveAttribute('target', '_blank');
-      await expect(link).toHaveAttribute('rel', /noopener/);
+      for (const link of [site, code, preview]) {
+        await expect(link).toHaveAttribute('target', '_blank');
+        await expect(link).toHaveAttribute('rel', /noopener/);
+      }
+      const image = preview.locator('img');
+      await expect(image).toHaveAttribute('alt', /.+/);
+      const response = await request.get((await image.getAttribute('src'))!);
+      expect(response.status()).toBe(200);
+      expect(response.headers()['content-type']).toContain('image/webp');
     }
+
+    await expect(page.locator('#client-projects')).toHaveText(locale === 'de' ? 'Kundenprojekte' : 'Client projects');
+    await expect(page.locator('#personal-projects')).toHaveText(locale === 'de' ? 'Persönliche Projekte' : 'Personal projects');
+    await expect(page.locator('#project-daytona .work__tags')).toContainText('Higgsfield');
+    await expect(page.locator('#project-daytona .work__tags')).toContainText('Codex');
   });
 }
