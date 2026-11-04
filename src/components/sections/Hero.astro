@@ -1,371 +1,85 @@
 ---
-import { getImage } from 'astro:assets';
-import posterDark from '../../assets/hero-poster-dark.png';
-import posterLight from '../../assets/hero-poster-light.png';
-import heroSource from '../../assets/hero-source.png';
-
+import type { Locale } from '../../lib/i18n';
 interface Props {
-  name: string;
-  lineBefore: string;
-  lineAccent: string;
-  lineAfter: string;
-  intro: string;
-  alt: string;
+  name: string; lineAccent: string; lineAfter: string; intro: string; alt: string; locale: Locale;
 }
-
-const { name, lineBefore, lineAccent, lineAfter, intro, alt } = Astro.props;
-
-const sampleSource = await getImage({ src: heroSource, format: 'webp', quality: 92 });
-
-const POSTER_WIDTHS = [360, 540, 720];
-const POSTER_SIZES = '(min-width: 62rem) 30rem, 20rem';
-const posterOptions = { widths: POSTER_WIDTHS, format: 'webp' as const, quality: 72 };
-
-const light = await getImage({ src: posterLight, ...posterOptions });
-const dark = await getImage({ src: posterDark, ...posterOptions });
+const { name, lineAccent, lineAfter, intro, locale } = Astro.props;
+const de = locale === 'de';
 ---
-
 <section class="hero" id="start" aria-labelledby="hero-name" data-hero>
-  <div class="u-shell hero__inner">
-    <div class="hero__text">
-      <h1 class="hero__name" id="hero-name">{name}</h1>
-      <p class="hero__line">{lineBefore} <em class="accent">{lineAccent}</em>{lineAfter}</p>
-      <p class="hero__intro">{intro}</p>
-      <div class="hero__actions"><slot name="actions" /></div>
-    </div>
-
-    <div class="hero__visual" data-hero-visual data-hero-src={sampleSource.src}>
-      <div class="hero__frame">
-        <picture>
-          <source
-            data-poster-source
-            type="image/webp"
-            media="(prefers-color-scheme: dark)"
-            srcset={dark.srcSet.attribute}
-            sizes={POSTER_SIZES}
-          />
-          <img
-            class="hero__poster"
-            data-hero-poster
-            data-light-src={light.src}
-            data-light-srcset={light.srcSet.attribute}
-            data-dark-src={dark.src}
-            data-dark-srcset={dark.srcSet.attribute}
-            src={light.src}
-            srcset={light.srcSet.attribute}
-            sizes={POSTER_SIZES}
-            width={light.attributes.width}
-            height={light.attributes.height}
-            alt={alt}
-            loading="eager"
-            decoding="sync"
-            fetchpriority="high"
-          />
-        </picture>
-        <div class="hero__canvas" data-hero-canvas aria-hidden="true"></div>
+  <div class="u-shell hero__shell">
+    <div class="hero__inner">
+      <div class="hero__text">
+        <h1 class="hero__name" id="hero-name" data-name-decode>{name}</h1>
+        <p class="hero__line"><em class="accent">{lineAccent}</em>{lineAfter}</p>
+        <p class="hero__intro">{intro}</p>
+        <div class="hero__actions"><slot name="actions" /></div>
       </div>
-      <script is:inline>
-        (function () {
-          var img = document.currentScript.parentElement.querySelector('[data-hero-poster]');
-          if (!img) return;
-          var stored = null;
-          try {
-            stored = localStorage.getItem('braendle-theme');
-          } catch (error) {}
-          if (stored !== 'light' && stored !== 'dark') return;
-          var source = img.parentElement.querySelector('[data-poster-source]');
-          if (source) source.remove();
-          img.srcset = stored === 'dark' ? img.dataset.darkSrcset : img.dataset.lightSrcset;
-          img.src = stored === 'dark' ? img.dataset.darkSrc : img.dataset.lightSrc;
-        })();
-      </script>
+      <div class="hero__visual" data-hero-visual>
+        <div class="hero__stage">
+          <div class="hero__frame" data-ben-anchor>
+            <img data-ben-poster class="hero__poster" src="/images/ben-poster.webp" width="800" height="900" alt={de ? 'Ben als 3D-Figur mit braunem Haar, schwarzem Hoodie und weissen Sneakern' : 'A 3D Ben with brown hair, a black hoodie and white trainers'} fetchpriority="high" />
+          </div>
+          <span class="hero__ground" aria-hidden="true"></span>
+        </div>
+        <div class="hero__interaction">
+          <p class="hero__welcome">{de ? 'Hi, ich bin Ben.' : 'Hi, I’m Ben.'}</p>
+          <a class="hero__meet" href={`/${locale}/ben/`} data-astro-reload>{de ? 'Ben in 3D entdecken' : 'Meet Ben in 3D'} <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
     </div>
+    <a class="hero__scroll" href="#stack" aria-label={de ? 'Zu den Technologien scrollen' : 'Scroll to the technologies'}>
+      <span class="hero__scroll-label">Scroll</span>
+      <svg class="hero__scroll-arrow" width="12" height="30" viewBox="0 0 12 30" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 1v27M1.5 23.5 6 28l4.5-4.5" /></svg>
+    </a>
   </div>
 </section>
-
-<script>
-  import type { HeroCanvasHandle } from '../islands/HeroCanvas';
-  import { onThemeChange, resolveTheme } from '../../lib/theme';
-
-  const KEEP_ALIVE = '150%';
-
-  let handle: HeroCanvasHandle | null = null;
-  let observer: IntersectionObserver | null = null;
-  let stopTheme: (() => void) | null = null;
-  let detachScroll: (() => void) | null = null;
-  let poster: HTMLImageElement | null = null;
-  let installed: HTMLElement | null = null;
-  let generation = 0;
-  let loading = false;
-  let wanted = false;
-
-  function webglAvailable(): boolean {
-    try {
-      const probe = document.createElement('canvas');
-      const gl = probe.getContext('webgl2') ?? probe.getContext('webgl');
-      if (!gl) return false;
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  function skipReason(): string | null {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'reduced-motion';
-    if (!webglAvailable()) return 'no-webgl';
-    return null;
-  }
-
-  function finePointer(): boolean {
-    return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  }
-
-  function unmount(): void {
-    handle?.destroy();
-    handle = null;
-    installed?.removeAttribute('data-hero-ready');
-  }
-
-  function syncPoster(theme: 'light' | 'dark'): void {
-    if (!poster) return;
-    const source = poster.parentElement?.querySelector('[data-poster-source]');
-    source?.remove();
-    const set = theme === 'dark' ? poster.dataset.darkSrcset : poster.dataset.lightSrcset;
-    const src = theme === 'dark' ? poster.dataset.darkSrc : poster.dataset.lightSrc;
-    if (set && poster.srcset !== set) poster.srcset = set;
-    if (src && !poster.src.endsWith(src)) poster.src = src;
-  }
-
-  function teardown(): void {
-    generation += 1;
-    wanted = false;
-    observer?.disconnect();
-    observer = null;
-    stopTheme?.();
-    stopTheme = null;
-    detachScroll?.();
-    detachScroll = null;
-    unmount();
-    installed = null;
-    poster = null;
-  }
-
-  function trackScroll(section: HTMLElement): () => void {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const rect = section.getBoundingClientRect();
-      const travel = rect.height || 1;
-      const progress = Math.min(Math.max(-rect.top / travel, 0), 1);
-      handle?.setScroll(progress);
-    };
-    const onScroll = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(update);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    update();
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
-  }
-
-  function want(
-    next: boolean,
-    mount: HTMLElement,
-    section: HTMLElement,
-    frame: HTMLElement,
-    src: string,
-  ): void {
-    wanted = next;
-    if (!next) {
-      if (handle) unmount();
-      return;
-    }
-    if (handle || loading) return;
-
-    loading = true;
-    const gen = generation;
-    void import('../islands/HeroCanvas')
-      .then(({ mountHeroCanvas }) => {
-        loading = false;
-        if (gen !== generation || !wanted || handle) return;
-        const fine = finePointer();
-        handle = mountHeroCanvas(mount, {
-          src,
-          pointerTarget: section,
-          frame,
-          theme: resolveTheme(),
-          ambient: !fine,
-          maxDpr: fine ? 1.5 : 2,
-          onReady: () => installed?.setAttribute('data-hero-ready', 'true'),
-        });
-        detachScroll = trackScroll(section);
-      })
-      .catch((error: unknown) => {
-        loading = false;
-        installed?.setAttribute('data-hero-skip', 'load-failed');
-        console.error('[hero] island failed to load, keeping the poster', error);
-      });
-  }
-
-  function setup(): void {
-    const visual = document.querySelector<HTMLElement>('[data-hero-visual]');
-    if (visual && visual === installed) return;
-
-    teardown();
-    const section = document.querySelector<HTMLElement>('[data-hero]');
-    const mount = visual?.querySelector<HTMLElement>('[data-hero-canvas]');
-    const frame = visual?.querySelector<HTMLElement>('.hero__frame');
-    const src = visual?.dataset.heroSrc;
-
-    poster = visual?.querySelector<HTMLImageElement>('[data-hero-poster]') ?? null;
-    syncPoster(resolveTheme());
-    stopTheme = onThemeChange((theme) => {
-      syncPoster(theme);
-      handle?.setTheme(theme);
-    });
-
-    if (!visual || !section || !mount || !frame || !src) return;
-
-    const skip = skipReason();
-    if (skip) {
-      visual.dataset.heroSkip = skip;
-      return;
-    }
-    delete visual.dataset.heroSkip;
-
-    installed = visual;
-
-    observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) want(entry.isIntersecting, mount, section, frame, src);
-      },
-      { rootMargin: `${KEEP_ALIVE} 0px` },
-    );
-    observer.observe(visual);
-  }
-
-  document.addEventListener('astro:page-load', setup);
-  document.addEventListener('astro:before-swap', teardown);
-
-  if (document.readyState === 'complete') setup();
-  else window.addEventListener('load', setup, { once: true });
-</script>
-
 <style>
-  .hero {
-    display: flex;
-    align-items: flex-start;
-    min-height: 100svh;
-    padding-block: 4rem var(--space-xl);
+  .hero { min-height: min(960px,100svh); display: flex; flex-direction: column; padding-block: 7rem 1.25rem; }
+  .hero__shell { flex: 1; display: flex; flex-direction: column; }
+  .hero__inner { display: grid; grid-template-columns: 1.05fr 1fr; gap: 3rem; align-items: center; margin-block: auto; }
+  .hero__name { max-width: 8ch; font-size: clamp(4.2rem, 7.4vw, 7rem); font-weight: 550; letter-spacing: -.055em; line-height: .96; }
+  .hero__line { font-size: var(--step-3); line-height: 1.2; margin-top: 1.5rem; letter-spacing: var(--tracking-tight); }
+  .hero__intro { max-width: 31rem; margin-top: 1.75rem; color: var(--fg-muted); font-size: 1rem; line-height: 1.7; text-wrap: pretty; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.75rem; }
+  .hero__visual { min-width: 0; position: relative; }
+  .hero__stage { position: relative; height: 420px; }
+  .hero__frame { position: absolute; width: 100%; height: 100%; }
+  .hero__poster { width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 1; }
+  .hero__ground { position: absolute; bottom: 5%; left: 28%; width: 44%; height: 16px; border-radius: 50%; background: var(--fg); opacity: .10; filter: blur(10px); }
+  .hero__interaction { display: grid; justify-items: center; gap: .15rem; margin-top: .75rem; text-align: center; }
+  .hero__welcome { font-family: var(--font-accent); font-size: 1.9rem; font-style: italic; line-height: 1.2; }
+  .hero__meet { display: inline-flex; align-items: center; gap: .45rem; padding-block: .35rem; font-size: var(--step--1); color: var(--fg-muted); text-decoration: none; transition: color .25s var(--ease-out); }
+  .hero__meet span { color: var(--accent); transition: transform .25s var(--ease-out); }
+  .hero__meet:hover { color: var(--accent); }
+  .hero__meet:hover span { transform: translate(2px,-2px); }
+  .hero__scroll { align-self: center; display: flex; flex-direction: column; align-items: center; gap: .65rem; margin-top: 2.5rem; padding: .5rem .75rem; color: var(--fg-muted); text-decoration: none; transition: color .25s var(--ease-out); }
+  .hero__scroll:hover { color: var(--fg); }
+  /* Letter spacing trails the last letter; the same space in front keeps the word centred over the arrow. */
+  .hero__scroll-label { padding-inline-start: var(--tracking-wide); font-size: .6875rem; font-weight: 500; letter-spacing: var(--tracking-wide); line-height: 1; text-transform: uppercase; }
+  .hero__scroll-arrow { display: block; color: var(--accent); animation: hero-scroll-bob 2s ease-in-out infinite; }
+  @keyframes hero-scroll-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+  @media (prefers-reduced-motion: reduce) { .hero__scroll-arrow { animation: none; } }
+  @media (max-width: 61.99rem) {
+    .hero { padding-top: 6rem; }
+    .hero__inner { grid-template-columns: 1fr; gap: 2rem; }
+    .hero__text { max-width: 40rem; }
+    .hero__name { max-width: none; font-size: clamp(3.4rem, 10vw, 6rem); }
+    .hero__line { font-size: clamp(1.45rem, 4vw, 2.4rem); }
+    .hero__intro { max-width: 36rem; }
+    .hero__stage { height: 330px; max-width: 350px; margin-inline: auto; }
+    .hero__scroll { margin-top: 2rem; }
+    .hero__interaction { margin-top: .5rem; }
   }
-
-  .hero__inner {
-    display: grid;
-    gap: var(--space-m);
-    align-items: center;
-  }
-
-  .hero__visual {
-    order: -1;
-    justify-self: center;
-    width: 100%;
-    max-width: 30rem;
-  }
-
-  .hero__frame {
-    --hero-overscan: min(50%, (100vw - 100%) / 2);
-
-    position: relative;
-    aspect-ratio: 1 / 1;
-    inline-size: min(100%, 30rem, 56svh);
-    block-size: auto;
-    margin-inline: auto;
-  }
-
-  .hero__poster {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: opacity 0.42s var(--ease-out);
-  }
-
-  .hero__canvas {
-    position: absolute;
-    inset: calc(var(--hero-overscan) * -1);
-    opacity: 0;
-    transition: opacity 0.42s var(--ease-out);
-  }
-
-  .hero__visual[data-hero-ready='true'] .hero__poster {
-    opacity: 0;
-  }
-
-  .hero__visual[data-hero-ready='true'] .hero__canvas {
-    opacity: 1;
-  }
-
-  .hero__name {
-    font-size: var(--step-5);
-    font-weight: 600;
-    line-height: var(--leading-tight);
-  }
-
-  .hero__line {
-    margin-top: var(--space-2xs);
-    font-size: var(--step-3);
-    font-weight: 400;
-    line-height: var(--leading-head);
-    letter-spacing: var(--tracking-tight);
-    text-wrap: balance;
-  }
-
-  .hero__intro {
-    max-width: 32rem;
-    margin-top: clamp(2.5rem, 11svh, 5rem);
-    color: var(--fg-muted);
-    text-wrap: pretty;
-  }
-
-  .hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2xs) var(--space-xs);
-    margin-top: var(--space-l);
-  }
-
-  @media (min-width: 62rem) {
-    .hero {
-      align-items: center;
-    }
-
-    .hero__intro {
-      margin-top: var(--space-m);
-    }
-
-    .hero__inner {
-      grid-template-columns: minmax(18rem, 30rem) 1fr;
-      gap: var(--space-2xl);
-    }
-
-    .hero__visual {
-      grid-area: 1 / 1;
-      max-width: none;
-    }
-
-    .hero__frame {
-      inline-size: 100%;
-    }
-
-    .hero__text {
-      grid-area: 1 / 2;
-    }
+  @media (max-width: 380px) { .hero__line { font-size: 1.35rem; } .hero__stage { height: 290px; } }
+  @media (max-width: 48rem) {
+    .hero__inner { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+    .hero__text { display: contents; }
+    .hero__name { order: 1; }
+    .hero__line { order: 2; margin-top: 1rem; }
+    .hero__visual { order: 3; margin-top: 1.5rem; }
+    .hero__stage { height: 285px; max-width: 310px; }
+    .hero__intro { order: 4; margin-top: 1.75rem; }
+    .hero__actions { order: 5; }
   }
 </style>

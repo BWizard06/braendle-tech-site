@@ -34,7 +34,7 @@ const groups = [
       <section class="work__group" aria-labelledby={group.id}>
         <h3 class="work__category" id={group.id}>{pick(group.label, locale)}</h3>
         {group.projects.map((reference) => (
-        <article class="work__item" id={`project-${reference.id}`} data-reveal>
+        <article class="work__item" id={`project-${reference.id}`} data-reveal data-ben-topic data-ben-say={reference.say && pick(reference.say, locale)}>
           <div class="work__meta">
             <a
               class="work__preview"
@@ -95,13 +95,29 @@ const groups = [
         ))}
       </section>
     ))}
+    {/* Ben walks along the bottom of the screen while the projects are read, in the gutter
+        between previews and text (data-ben-gutter), and rests at the end of the section. */}
+    <div class="ben-dock" data-ben-anchor data-ben-dock data-ben-gutter aria-hidden="true"></div>
   </div>
 </section>
 
 <style>
   .work {
-    padding-block: clamp(2.75rem, 5vw, 4rem);
+    padding-top: clamp(2.75rem, 5vw, 4rem);
     border-top: 1px solid var(--rule);
+  }
+
+  /* The section's bottom space sits above Ben's dock, so he comes to rest exactly on the rule
+     that ends the projects. */
+  .work .ben-dock {
+    margin-top: clamp(2.75rem, 5vw, 4rem);
+  }
+
+  /* Phones: a strip at the right of the text where Ben walks while it is read. */
+  @media (max-width: 51.99rem) {
+    .work__body {
+      padding-right: 3.75rem;
+    }
   }
 
   .work__head {
@@ -224,4 +240,5 @@ const groups = [
       gap: var(--space-2xl);
     }
   }
+
 </style>

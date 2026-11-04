@@ -1,4 +1,4 @@
-import type { ThemeName } from './hero/palette';
+export type ThemeName = 'light' | 'dark';
 
 export const THEME_STORAGE_KEY = 'braendle-theme';
 

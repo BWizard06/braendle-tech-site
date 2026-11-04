@@ -26,7 +26,7 @@ const [sans, serif, portrait] = await Promise.all([
 ]);
 
 function template(locale: Locale): string {
-  const line = `${pick(hero.lineBefore, locale)} <em>${pick(hero.lineAccent, locale)}</em>${pick(hero.lineAfter, locale)}`;
+  const line = `<em>${pick(hero.lineAccent, locale)}</em>${pick(hero.lineAfter, locale)}`;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
 @font-face { font-family: 'HeroSans'; src: url('${sans}') format('woff2'); font-weight: 100 900; font-display: block; }
 @font-face { font-family: 'HeroSerif'; src: url('${serif}') format('woff2'); font-style: italic; font-display: block; }

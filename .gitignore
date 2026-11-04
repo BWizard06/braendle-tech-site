@@ -30,6 +30,21 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# Private references and local previews never belong in the repository.
+# Private source photos/videos: keep every reference local, never in Git.
 references/
+# Generated local previews
 .work/
+*.blend1
+# Local avatar pipeline: Blender scripts, specs and review renders stay off GitHub.
+/avatar-pipeline/
+
+# Local authoring sources and assistant sessions, not part of the website.
+/design/
+/.claude/
+/.codex/
+/:memory:*
+
+# Cloudflare local development secrets and cache.
+.dev.vars
+.dev.vars.*
+.wrangler/

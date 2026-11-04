@@ -7,12 +7,15 @@ interface Props {
   kicker: string;
   framing: string;
   groups: StackGroup[];
+  /** What the 3D Ben says when he arrives at the section. */
+  say?: string;
 }
 
-const { locale, kicker, framing, groups } = Astro.props;
+const { locale, kicker, framing, groups, say } = Astro.props;
 ---
 
 <section class="stack" id="stack" aria-labelledby="stack-title">
+  <div class="u-shell stack__station-shell" aria-hidden="true"><div class="ben-station" data-ben-anchor data-ben-stack data-ben-say={say}></div></div>
   <div class="u-shell">
     <header class="stack__head" data-reveal>
       <h2 class="u-kicker" id="stack-title">{kicker}</h2>
@@ -22,7 +25,7 @@ const { locale, kicker, framing, groups } = Astro.props;
     <dl class="stack__list">
       {
         groups.map((group) => (
-          <div class="stack__row" data-reveal>
+          <div class="stack__row" data-reveal data-ben-row data-ben-say={group.say && pick(group.say, locale)}>
             <dt class="stack__label">{pick(group.label, locale)}</dt>
             <dd class="stack__items">
               {group.items.map((item) => (
@@ -37,6 +40,7 @@ const { locale, kicker, framing, groups } = Astro.props;
 </section>
 
 <style>
+  .stack__station-shell { position: absolute; top: 0; left: 50%; transform: translateX(-50%); }
   .stack {
     padding-block: clamp(2.75rem, 5vw, 4rem);
     border-top: 1px solid var(--rule);
@@ -60,6 +64,7 @@ const { locale, kicker, framing, groups } = Astro.props;
 
   .stack__row {
     display: grid;
+    cursor: default;
     gap: var(--space-2xs);
     padding-block: var(--space-m);
     border-top: 1px solid var(--rule);
@@ -84,7 +89,14 @@ const { locale, kicker, framing, groups } = Astro.props;
     margin: 0;
   }
 
+  /* Ben hops along the rows' rules at the right: keep that strip free. */
+  @media (min-width: 62rem) { .stack__row { padding-right: 170px; } }
+  @media (max-width: 61.99rem) { .stack__row { padding-right: 3.75rem; } }
+
   .stack__item {
+    padding: .25rem 0;
+    cursor: default;
+    color: inherit;
     font-size: var(--step-1);
     font-weight: 500;
     letter-spacing: var(--tracking-tight);

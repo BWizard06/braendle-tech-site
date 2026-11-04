@@ -1,0 +1,87 @@
+---
+import { companion } from '../content';
+import { pick, type Locale } from '../lib/i18n';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+// Lines for the speech bubble; stations and rows carry their own (data-ben-say).
+const lines = JSON.stringify({
+  hint: pick(companion.hint, locale),
+  hintTouch: pick(companion.hintTouch, locale),
+  thanks: pick(companion.thanks, locale),
+  tricks: Object.fromEntries(Object.entries(companion.tricks).map(([name, line]) => [name, pick(line, locale)])),
+});
+---
+<div class="companion" data-companion data-model="/models/ben-hero.glb" data-gesture-model="/models/ben-gestures.glb" data-lines={lines} aria-hidden="true">
+  {/* Ben's body lives in the page, not over the screen: it scrolls with the content natively.
+      In long sections it moves into a sticky dock (data-ben-dock) that keeps him in view. */}
+  <div class="companion__body" data-ben-body>
+    <div class="companion__canvas" data-companion-canvas></div>
+    <div data-ben-bounds></div>
+    <p class="companion__bubble" data-ben-bubble data-show="false"></p>
+  </div>
+</div>
+<script>
+  let dispose: (() => void) | undefined;
+  let generation = 0;
+  async function setup() {
+    const gen = ++generation;
+    dispose?.();
+    dispose = undefined;
+    const element = document.querySelector<HTMLElement>('[data-companion]');
+    if (!element) return;
+    const { startCompanion } = await import('../lib/companion/controller');
+    if (gen !== generation) return;
+    dispose = startCompanion(element);
+  }
+  document.addEventListener('astro:page-load', setup);
+  document.addEventListener('astro:before-swap', () => { generation++; dispose?.(); dispose = undefined; });
+  if (document.readyState !== 'loading') setup();
+  else document.addEventListener('DOMContentLoaded', setup, { once: true });
+</script>
+<style is:global>
+  /* A layer at the top of the document (1 px tall, invisible); Ben's body is placed in page
+     coordinates from here. */
+  .companion { position: absolute; top: 0; left: 0; width: 100%; height: 1px; z-index: 12; pointer-events: none; }
+  .companion__body { position: absolute; top: 0; left: 0; pointer-events: none; opacity: 0; }
+  .companion__body[data-ready] { opacity: 1; transition: opacity .35s ease; }
+  .companion__canvas, .companion__canvas canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* Ben himself is clickable (a trick each time); the rest of the layer lets clicks through. */
+  .companion__body[data-ready] [data-ben-bounds] { pointer-events: auto; cursor: pointer; }
+  /* A dock rides along the bottom of the screen while its section is read, and rests at the
+     section's end. Ben stands on its top edge; --ben-size is his height there. */
+  .ben-dock { position: sticky; bottom: 0; height: 0; z-index: 12; pointer-events: none; --ben-size: 165px; }
+  .companion__bubble {
+    position: absolute; top: 0; left: 0; width: max-content; max-width: 16rem; margin: 0;
+    padding: .5rem .8rem; border: 1px solid var(--rule); border-radius: .9rem;
+    background: var(--bg); color: var(--fg); box-shadow: 0 6px 18px rgb(0 0 0 / .08);
+    font-size: .78rem; line-height: 1.35; text-wrap: pretty;
+    opacity: 0; transition: opacity .25s ease; pointer-events: none;
+  }
+  .companion__bubble[data-show="true"] { opacity: 1; }
+  /* The tail points right, towards Ben's head. */
+  .companion__bubble::after {
+    content: ''; position: absolute; right: -6px; top: 55%; width: 10px; height: 10px;
+    background: inherit; border: inherit; border-width: 1px 1px 0 0; transform: translateY(-50%) rotate(45deg);
+  }
+  [data-ben-bounds] { position: absolute; top: 0; left: 0; pointer-events: none; }
+  html[data-companion-active] [data-ben-poster] { opacity: 0; }
+  [data-ben-anchor] { pointer-events: none; }
+  .ben-station { position: absolute; width: 140px; height: 165px; right: var(--gutter); top: -165px; }
+  .stack, .work { position: relative; }
+  /* Ben's canvas is wider than he is (room for the beams): its overhang never widens the page.
+     clip, unlike hidden, keeps the docks sticky. */
+  .companion, .work, .contact { overflow-x: clip; }
+  .stack { margin-top: 5rem; }
+  .work { margin-top: 7rem; }
+  [data-ben-poster] { transition: opacity .3s ease; }
+  /* Phones and tablets: Ben follows at a smaller size (96 px instead of 165 px). The space above
+     the technology rule leaves room for him without covering the hero. */
+  @media (max-width: 61.99rem) {
+    .ben-station { width: 64px; height: 96px; top: -96px; }
+    .ben-dock { --ben-size: 96px; }
+    .stack { margin-top: 3.5rem; }
+    .work { margin-top: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .companion { display: none; } }
+</style>

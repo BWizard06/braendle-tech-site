@@ -204,7 +204,8 @@ for (const [locale, visit, source] of [
 
     for (const [id, website, repository] of [
       ['corelation', 'https://corelation.ch/', 'https://github.com/BWizard06/corelation'],
-      ['kati-schepis', 'https://fengshui.k-schepis.workers.dev/', 'https://github.com/BWizard06/fengshui'],
+      ['kati-schepis', 'https://katischepis.ch/', 'https://github.com/BWizard06/fengshui'],
+      ['lacuna', 'https://lacuna.braendle.tech/', 'https://github.com/BWizard06/Lacuna'],
       ['daytona', 'https://daytona.braendle.tech/', 'https://github.com/BWizard06/daytona-experience'],
     ]) {
       const project = page.locator(`#project-${id}`);
@@ -213,7 +214,7 @@ for (const [locale, visit, source] of [
       const preview = project.locator('.work__preview');
       await expect(site).toHaveAttribute('href', website);
       await expect(preview).toHaveAttribute('href', website);
-      await expect(site).toContainText(id === 'kati-schepis' ? (locale === 'de' ? 'Vorschau ansehen' : 'View preview') : visit);
+      await expect(site).toContainText(visit);
       await expect(code).toHaveAttribute('href', repository);
       await expect(code).toContainText(source);
 
@@ -232,5 +233,8 @@ for (const [locale, visit, source] of [
     await expect(page.locator('#personal-projects')).toHaveText(locale === 'de' ? 'Persönliche Projekte' : 'Personal projects');
     await expect(page.locator('#project-daytona .work__tags')).toContainText('Higgsfield');
     await expect(page.locator('#project-daytona .work__tags')).toContainText('Codex');
+    await expect(page.locator('#project-lacuna .work__tags')).toContainText('Tailwind CSS');
+    await expect(page.locator('#project-lacuna .work__note')).toContainText(locale === 'de' ? 'Konzeptprojekt' : 'concept project');
+    await expect(page.locator('#work button, project-stack')).toHaveCount(0);
   });
 }

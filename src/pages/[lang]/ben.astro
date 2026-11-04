@@ -1,0 +1,68 @@
+---
+import '@fontsource-variable/instrument-sans/wght.css';
+import '@fontsource/instrument-serif/latin-400-italic.css';
+import '../../styles/global.css';
+import '../../styles/ben-studio.css';
+import BenStudio from '../../components/islands/BenStudio';
+import ThemeToggle from '../../components/ThemeToggle.astro';
+import { DEFAULT_LOCALE, LOCALES, isLocale, otherLocale } from '../../lib/i18n';
+
+export function getStaticPaths() {
+  return LOCALES.map(lang => ({ params: { lang } }));
+}
+const lang = Astro.params.lang ?? '';
+const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+const de = locale === 'de';
+const title = de ? 'Ben in Bewegung — Ben Brändle' : 'Ben in motion — Ben Brändle';
+const description = de ? 'Lerne meinen digitalen Begleiter kennen. Entdecke Ben in 3D und wähle seine nächste Bewegung.' : 'Meet my digital companion. Explore Ben in 3D and choose his next move.';
+---
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content="#f5f4ef" />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="canonical" href={new URL(`/${locale}/ben/`, Astro.site)} />
+    {LOCALES.map(l => <link rel="alternate" hreflang={l} href={new URL(`/${l}/ben/`, Astro.site)} />)}
+    <script is:inline>
+      try { const theme = localStorage.getItem('braendle-theme'); if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme; } catch {}
+    </script>
+    {
+      import.meta.env.DEV && (
+        <script
+          is:inline
+          type="module"
+          set:html={`import RefreshRuntime from "/@react-refresh";
+RefreshRuntime.injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;
+window.__vite_plugin_react_preamble_installed__ = true;`}
+        />
+      )
+    }
+  </head>
+  <body class="ben-page">
+    <a href="#studio" class="skip-link">{de ? 'Zur Modellansicht' : 'Skip to model viewer'}</a>
+    <header class="ben-header">
+      <a class="ben-brand" href={`/${locale}/`} aria-label={de ? 'Ben Brändle – zum Portfolio' : 'Ben Brändle – back to portfolio'}>b.<span>BEN BRÄNDLE<span class="ben-brand__separator">/</span><span class="ben-brand__sub">PLAYGROUND</span></span></a>
+      <nav aria-label={de ? 'Seitennavigation' : 'Page navigation'}>
+        <a class="ben-back" href={`/${locale}/`}><span aria-hidden="true">↖</span> {de ? 'Zum Portfolio' : 'Portfolio'}</a>
+        <a class="ben-language" href={`/${otherLocale(locale)}/ben/`} lang={otherLocale(locale)} aria-label={de ? 'View in English' : 'Auf Deutsch ansehen'}>{de ? 'EN' : 'DE'}</a>
+        <ThemeToggle toLight={de ? 'Helles Erscheinungsbild' : 'Light appearance'} toDark={de ? 'Dunkles Erscheinungsbild' : 'Dark appearance'} />
+      </nav>
+    </header>
+    <main id="studio" class="ben-main">
+      <div class="ben-intro">
+        <div><p class="ben-eyebrow">{de ? 'Ein kleines Experiment mit Persönlichkeit' : 'A little experiment with personality'}</p><h1>Ben, <em>{de ? 'in Bewegung.' : 'in motion.'}</em></h1></div>
+        <p class="ben-intro__text">{de ? 'Mal ein Winken. Mal ein Salto. Entdecke meinen digitalen Begleiter – und entscheide, was als Nächstes passiert.' : 'A wave. A flip. A little personality. Meet my digital companion – and decide what happens next.'}</p>
+      </div>
+      <BenStudio locale={locale} client:load />
+      <noscript><p class="ben-no-script">{de ? 'Für die interaktive 3D-Ansicht bitte JavaScript aktivieren.' : 'Please enable JavaScript to use the interactive 3D viewer.'}</p></noscript>
+    </main>
+    <footer class="ben-footer"><span>BEN BRÄNDLE © {new Date().getFullYear()}</span><span>{de ? 'Neugier in drei Dimensionen.' : 'Curiosity in three dimensions.'}</span></footer>
+  </body>
+</html>

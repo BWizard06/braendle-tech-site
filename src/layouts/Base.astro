@@ -34,7 +34,6 @@ const person = {
   url: canonical.href,
   image: ogImage.href,
   jobTitle: locale === 'de' ? 'Fullstack Developer' : 'Fullstack developer',
-  email: `mailto:${CONTACT.email}`,
   sameAs: [CONTACT.linkedin],
   address: {
     '@type': 'PostalAddress',
@@ -88,6 +87,7 @@ const person = {
     }
     <link rel="alternate" hreflang="x-default" href={new URL(localizedPath('de'), Astro.site)} />
     <ClientRouter />
+    <noscript><style is:inline>[data-reveal] { opacity: 1 !important; transform: none !important; }</style></noscript>
     <script is:inline>
       (function () {
         function apply() {

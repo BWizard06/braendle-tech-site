@@ -7,7 +7,10 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
-      filter: (page) => new URL(page).pathname !== '/',
+      filter: (page) => {
+        const path = new URL(page).pathname;
+        return path !== '/' && !/\/ben\/?$/.test(path);
+      },
       i18n: {
         defaultLocale: 'de',
         locales: { de: 'de', en: 'en' },

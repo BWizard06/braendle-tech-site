@@ -1,15 +1,15 @@
-import { ageInYears, type Localized } from './lib/i18n';
+import type { Localized } from './lib/i18n';
 
-const AGE = ageInYears(new Date());
-
+// No public email address: the contact form replaces it.
 export const CONTACT = {
-  email: 'ben@braendle.tech',
   linkedin: 'https://www.linkedin.com/in/ben-br%C3%A4ndle-55a4a42a0/',
 } as const;
 
 export interface StackGroup {
   label: Localized;
   items: string[];
+  /** What the 3D Ben says when he stands on this row. */
+  say?: Localized;
 }
 
 export interface Reference {
@@ -27,6 +27,8 @@ export interface Reference {
   visitLabel?: Localized;
   note?: Localized;
   tags?: string[];
+  /** What the 3D Ben says when he stands at this project. */
+  say?: Localized;
 }
 
 export const meta = {
@@ -47,8 +49,7 @@ export const meta = {
 
 export const hero = {
   name: 'Ben Brändle',
-  lineBefore: { de: `${AGE} Jahre alt,`, en: `${AGE} years old,` },
-  lineAccent: { de: 'Fullstack', en: 'fullstack' },
+  lineAccent: { de: 'Fullstack', en: 'Fullstack' },
   lineAfter: {
     de: ' Developer',
     en: ' developer',
@@ -65,6 +66,7 @@ export const hero = {
 
 export const stack = {
   kicker: { de: 'Technologien', en: 'Technologies' },
+  say: { de: 'Damit arbeite ich am liebsten.', en: 'These are my favourite tools.' },
   framing: {
     de: 'Am stärksten im TypeScript-Umfeld mit unterschiedlichen Frameworks. Go als Hauptsprache im Backend.',
     en: 'Strongest in the TypeScript world, across different frameworks. Go as my main backend language.',
@@ -73,22 +75,27 @@ export const stack = {
     {
       label: { de: 'Interface', en: 'Interface' },
       items: ['TypeScript', 'JavaScript', 'Vue', 'Nuxt', 'React', 'Next.js', 'Astro'],
+      say: { de: 'Alles, was man im Browser sieht und anklickt.', en: 'Everything you see and click in the browser.' },
     },
     {
       label: { de: 'Backend und Daten', en: 'Backend and data' },
       items: ['Go', 'SQL', 'NoSQL'],
+      say: { de: 'Logik, Schnittstellen und Daten hinter der Oberfläche.', en: 'Logic, APIs and data behind the interface.' },
     },
     {
       label: { de: 'Betrieb und Deployment', en: 'Operations and deployment' },
       items: ['Docker', 'Debian', 'Traefik', 'Authelia', 'CI/CD'],
+      say: { de: 'Vom Code bis auf den Server.', en: 'From the code all the way to the server.' },
     },
     {
       label: { de: 'KI', en: 'AI' },
       items: ['Claude Code', 'ChatGPT', 'OpenRouter', 'Higgsfield AI', 'Lumo AI'],
+      say: { de: 'KI gehört fest in meinen Werkzeugkasten.', en: 'AI is a fixed part of my toolkit.' },
     },
     {
       label: { de: 'Design', en: 'Design' },
       items: ['Figma'],
+      say: { de: 'Wie es aussieht, bevor es gebaut wird.', en: 'How it looks before it gets built.' },
     },
   ] satisfies StackGroup[],
 };
@@ -140,11 +147,12 @@ export const work = {
           en: 'Built the site, including responsive behaviour, performance and testing across devices and browsers.',
         },
       ],
+      say: { de: 'Website einer Kommunikationsagentur.', en: 'Website for a communications agency.' },
     },
     {
       id: 'kati-schepis',
       name: 'Kati Schepis · Feng Shui',
-      url: 'https://fengshui.k-schepis.workers.dev/',
+      url: 'https://katischepis.ch/',
       source: 'https://github.com/BWizard06/fengshui',
       image: '/images/fengshui-homepage.webp',
       imageWidth: 1280,
@@ -154,12 +162,12 @@ export const work = {
         en: 'Kati Schepis homepage with a welcome message and a bright living room',
       },
       role: {
-        de: 'Neuer Webauftritt für Feng-Shui-Beratung, 2026',
-        en: 'New website for a Feng Shui consultancy, 2026',
+        de: 'Neuer Webauftritt für Feng-Shui-Beratung, live seit 10/2026',
+        en: 'New website for a Feng Shui consultancy, live since 10/2026',
       },
       body: {
-        de: 'Individuell entwickelter Webauftritt für Kati Schepis. Gesamtverantwortung von Konzept und Gestaltung über die Umsetzung bis zu Domain, E-Mail und der Vorbereitung der Liveschaltung.',
-        en: 'A custom website for Kati Schepis. End-to-end responsibility, from concept and design through development to domain setup, email and launch preparation.',
+        de: 'Individuell entwickelter Webauftritt für Kati Schepis. Gesamtverantwortung von Konzept und Gestaltung über die Umsetzung bis zu Domain, E-Mail und Liveschaltung.',
+        en: 'A custom website for Kati Schepis. End-to-end responsibility, from concept and design through development to domain setup, email and go-live.',
       },
       bullets: [
         {
@@ -179,16 +187,12 @@ export const work = {
           en: 'Set up the domain transfer, business email address and hosting on Cloudflare.',
         },
         {
-          de: 'SEO-Grundlagen umgesetzt, auf verschiedenen Geräten und Browsern getestet und die Liveschaltung vorbereitet.',
-          en: 'Implemented SEO basics, tested across devices and browsers, and prepared the launch.',
+          de: 'SEO-Grundlagen umgesetzt, auf verschiedenen Geräten und Browsern getestet und live geschaltet.',
+          en: 'Implemented SEO basics, tested across devices and browsers, and took the site live.',
         },
       ],
-      visitLabel: { de: 'Vorschau ansehen', en: 'View preview' },
-      note: {
-        de: 'Aktuell als Vorschau verfügbar. Veröffentlichung unter katischepis.ch geplant für den 19.10.2026.',
-        en: 'Currently available as a preview. Launch on katischepis.ch is planned for 19 October 2026.',
-      },
       tags: ['Astro', 'TypeScript', 'React', 'Cloudflare', 'Resend', 'Mailchimp'],
+      say: { de: 'Website einer Feng-Shui-Beraterin.', en: 'Website for a Feng Shui consultant.' },
     },
   ] satisfies Reference[],
 };
@@ -199,6 +203,31 @@ export const projectCategories = {
 };
 
 export const personalProjects: Reference[] = [
+  {
+    id: 'lacuna',
+    name: 'LACUNA',
+    url: 'https://lacuna.braendle.tech/',
+    source: 'https://github.com/BWizard06/Lacuna',
+    image: '/images/lacuna-homepage.webp',
+    imageWidth: 1265,
+    imageHeight: 712,
+    alt: {
+      de: 'Startseite von LACUNA: eine Villa aus Holz und Naturstein über einem See im Abendlicht, mit «A world of your own.»',
+      en: 'LACUNA homepage: a villa of wood and natural stone above a lake at sunset, with “A world of your own.”',
+    },
+    role: { de: 'Interaktive Villa-Website', en: 'Interactive villa website' },
+    body: {
+      de: 'Eine fiktive Luxusvilla im Tessin, als interaktive Website gestaltet. Vom Eingang bis zur Poolterrasse: Eine scrollgesteuerte Kamerafahrt, dezent bewegte Bilder und ein interaktiver Grundriss machen das Haus erlebbar.',
+      en: 'A fictional luxury villa in Ticino, designed as an interactive website. From the entrance to the pool terrace: a scroll-driven camera journey, subtly moving images and an interactive floor plan bring the house to life.',
+    },
+    bullets: [],
+    note: {
+      de: 'Ein persönliches Konzeptprojekt, keine tatsächlich buchbare Unterkunft.',
+      en: 'A personal concept project, not a place you can actually book.',
+    },
+    tags: ['Astro', 'TypeScript', 'Tailwind CSS', 'Scroll Animation', 'Higgsfield', 'Codex'],
+    say: { de: 'Eine fiktive Villa im Tessin.', en: 'A fictional villa in Ticino.' },
+  },
   {
     id: 'daytona',
     name: 'Daytona Experience',
@@ -222,16 +251,59 @@ export const personalProjects: Reference[] = [
       en: 'A personal fan project, independent of Rolex.',
     },
     tags: ['Astro', 'JavaScript', 'Scroll Animation', 'Higgsfield', 'Codex'],
+    say: { de: 'Eine Uhr als Scroll-Erlebnis.', en: 'A watch as a scroll experience.' },
   },
 ];
+
+/** Speech bubbles of the 3D Ben (stations and rows carry their own lines). */
+export const companion = {
+  hint: { de: 'Psst … klick mich mal an!', en: 'Psst … try clicking me!' },
+  hintTouch: { de: 'Psst … tipp mich mal an!', en: 'Psst … try tapping me!' },
+  contact: { de: 'Schreib mir, ich freu mich!', en: 'Drop me a line!' },
+  thanks: { de: 'Danke für deine Nachricht!', en: 'Thanks for your message!' },
+  tricks: {
+    dance_06: { de: 'Kurze Tanzpause!', en: 'Quick dance break!' },
+    flip: { de: 'Hab ich lange geübt.', en: 'Took me ages to learn.' },
+    front_kick_02: { de: 'Hiyaa!', en: 'Hiyaa!' },
+    'press-up': { de: 'Zwischendurch ein paar Liegestütze.', en: 'Time for a few push-ups.' },
+    play_video_game: { de: 'Nur noch eine Runde!', en: 'Just one more round!' },
+  },
+} satisfies Record<string, Localized | Record<string, Localized>>;
 
 export const contact = {
   kicker: { de: 'Kontakt', en: 'Contact' },
   lead: {
-    de: 'Projekte, Kooperationen oder berufliche Anfragen: am schnellsten per E-Mail.',
-    en: 'Projects, collaborations, or job inquiries: the fastest way to reach me is by email.',
+    de: 'Projekte, Kooperationen oder berufliche Anfragen: Schreib mir direkt hier.',
+    en: 'Projects, collaborations or job inquiries: send me a message right here.',
   },
-  mail: { de: 'E-Mail Kontakt', en: 'E-Mail Contact' },
+  write: { de: 'Nachricht schreiben', en: 'Write a message' },
+  form: {
+    name: { de: 'Name', en: 'Name' },
+    email: { de: 'E-Mail', en: 'Email' },
+    message: { de: 'Nachricht', en: 'Message' },
+    submit: { de: 'Nachricht senden', en: 'Send message' },
+    privacy: {
+      de: 'Ich nutze deine Angaben nur, um dir zu antworten.',
+      en: 'I only use your details to reply to you.',
+    },
+    sending: { de: 'Wird gesendet …', en: 'Sending …' },
+    success: {
+      de: 'Danke! Deine Nachricht ist angekommen, ich melde mich bald.',
+      en: 'Thank you! Your message has arrived, I’ll get back to you soon.',
+    },
+    invalid: {
+      de: 'Bitte prüfe Name, E-Mail und Nachricht (mindestens 10 Zeichen).',
+      en: 'Please check your name, email and message (at least 10 characters).',
+    },
+    limited: {
+      de: 'Du hast in der letzten Stunde schon drei Nachrichten geschickt. Versuch es in {minutes} Min. wieder oder schreib mir auf LinkedIn.',
+      en: 'You’ve already sent three messages in the last hour. Try again in {minutes} min or message me on LinkedIn.',
+    },
+    failed: {
+      de: 'Das hat leider nicht geklappt. Versuch es später nochmals oder schreib mir auf LinkedIn.',
+      en: 'Sorry, that didn’t work. Please try again later or message me on LinkedIn.',
+    },
+  },
   linkedin: { de: 'LinkedIn', en: 'LinkedIn' },
   cv: { de: 'Lebenslauf (PDF)', en: 'CV (PDF)' },
   location: { de: 'Herrliberg bei Zürich, Schweiz', en: 'Herrliberg near Zurich, Switzerland' },

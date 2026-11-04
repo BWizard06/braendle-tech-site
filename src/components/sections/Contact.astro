@@ -1,34 +1,74 @@
 ---
-import { CONTACT } from '../../content';
+import { CONTACT, companion, contact } from '../../content';
+import { pick, type Locale } from '../../lib/i18n';
+import { LIMITS } from '../../lib/contact/validate';
 
 interface Props {
+  locale: Locale;
   kicker: string;
   lead: string;
-  mail: string;
   linkedin: string;
   cv: string;
   cvHref: string;
   location: string;
 }
 
-const { kicker, lead, mail, linkedin, cv, cvHref, location } = Astro.props;
+const { locale, kicker, lead, linkedin, cv, cvHref, location } = Astro.props;
 const year = new Date().getFullYear();
+const t = (key: keyof typeof contact.form) => pick(contact.form[key], locale);
 ---
 
 <section class="contact" id="kontakt" aria-labelledby="contact-title">
   <div class="u-shell">
-    <div class="contact__head" data-reveal>
-      <h2 class="u-kicker" id="contact-title">{kicker}</h2>
-      <p class="contact__lead">{lead}</p>
-      <a class="contact__mail" href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+    <div class="contact__grid">
+      <div class="contact__head" data-reveal>
+        <h2 class="u-kicker" id="contact-title">{kicker}</h2>
+        <p class="contact__lead">{lead}</p>
+        <div class="contact__actions">
+          <a class="pill" href={CONTACT.linkedin} rel="me noreferrer noopener" target="_blank">{linkedin}</a>
+          <a class="pill" href={cvHref} type="application/pdf" target="_blank" rel="noreferrer noopener">{cv}</a>
+        </div>
+      </div>
+
+      <form
+        class="contact__form"
+        method="post"
+        action="/api/contact"
+        data-contact-form
+        data-sending={t('sending')}
+        data-success={t('success')}
+        data-invalid={t('invalid')}
+        data-limited={t('limited')}
+        data-failed={t('failed')}
+      >
+        <input type="hidden" name="locale" value={locale} />
+        <div class="contact__trap" aria-hidden="true">
+          <label>Website <input name="website" tabindex="-1" autocomplete="off" /></label>
+        </div>
+        <div class="contact__pair">
+          <label class="contact__field">
+            <span>{t('name')}</span>
+            <input name="name" autocomplete="name" required maxlength={LIMITS.name} />
+          </label>
+          <label class="contact__field">
+            <span>{t('email')}</span>
+            <input name="email" type="email" autocomplete="email" required maxlength={LIMITS.email} />
+          </label>
+        </div>
+        <label class="contact__field">
+          <span>{t('message')}</span>
+          <textarea name="message" rows="5" required minlength={LIMITS.messageMin} maxlength={LIMITS.messageMax}></textarea>
+        </label>
+        <div class="contact__send">
+          <button class="pill pill--solid" type="submit">{t('submit')}</button>
+          <p class="contact__privacy">{t('privacy')}</p>
+        </div>
+        <p class="contact__status" role="status" data-contact-status></p>
+      </form>
     </div>
 
-    <div class="contact__actions" data-reveal>
-      <a class="pill pill--solid" href={`mailto:${CONTACT.email}`}>{mail}</a>
-      <a class="pill" href={CONTACT.linkedin} rel="me noreferrer noopener" target="_blank">{linkedin}</a>
-      <a class="pill" href={cvHref} type="application/pdf" target="_blank" rel="noreferrer noopener">{cv}</a>
-    </div>
-
+    {/* Ben walks along the bottom of the screen beside the form and rests on the footer rule. */}
+    <div class="contact__ground ben-dock" data-ben-anchor data-ben-dock data-ben-contact data-ben-say={pick(companion.contact, locale)} aria-hidden="true"></div>
     <div class="contact__foot">
       <p>{location}</p>
       <p class="contact__year">© {year} Ben Brändle</p>
@@ -36,10 +76,67 @@ const year = new Date().getFullYear();
   </div>
 </section>
 
+<script>
+  function bind() {
+    const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = 'true';
+    const status = form.querySelector<HTMLElement>('[data-contact-status]')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const opened = Date.now();
+    const say = (state: string, text: string) => { status.dataset.state = state; status.textContent = text; };
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (button.disabled) return;
+      const fields = Object.fromEntries(new FormData(form));
+      button.disabled = true;
+      say('sending', form.dataset.sending!);
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify({ ...fields, elapsed: Date.now() - opened }),
+        });
+        const result = (await response.json().catch(() => ({}))) as { ok?: boolean; retryAfter?: number };
+        if (response.ok && result.ok) {
+          form.reset();
+          say('success', form.dataset.success!);
+          // Ben thanks the visitor with a bow.
+          document.dispatchEvent(new CustomEvent('companion:gesture', { detail: 'bow' }));
+        } else if (response.status === 429) {
+          const minutes = Math.max(1, Math.ceil((result.retryAfter ?? 3600) / 60));
+          say('error', form.dataset.limited!.replace('{minutes}', String(minutes)));
+        } else {
+          say('error', response.status === 400 ? form.dataset.invalid! : form.dataset.failed!);
+        }
+      } catch {
+        say('error', form.dataset.failed!);
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+  document.addEventListener('astro:page-load', bind);
+  if (document.readyState !== 'loading') bind();
+  else document.addEventListener('DOMContentLoaded', bind, { once: true });
+</script>
+
 <style>
   .contact {
     padding-block: clamp(2.75rem, 5vw, 4rem);
     border-top: 1px solid var(--rule);
+  }
+
+  .contact__grid {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  /* Phones and tablets: a strip at the right where Ben walks beside the form. */
+  @media (max-width: 61.99rem) {
+    .contact__grid {
+      padding-right: 3.75rem;
+    }
   }
 
   .contact__head {
@@ -52,21 +149,101 @@ const year = new Date().getFullYear();
     text-wrap: pretty;
   }
 
-  .contact__mail {
-    display: inline-block;
-    margin-top: var(--space-m);
-    font-size: var(--step-2);
-    font-weight: 600;
-    letter-spacing: var(--tracking-tight);
-    text-decoration-color: var(--rule);
-    word-break: break-word;
-  }
-
   .contact__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2xs) var(--space-xs);
-    margin-top: var(--space-l);
+    margin-top: var(--space-m);
+  }
+
+  .contact__form {
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+  }
+
+  .contact__pair {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .contact__field {
+    display: grid;
+    gap: var(--space-3xs);
+    color: var(--fg-muted);
+    font-size: var(--step--1);
+    font-weight: 500;
+  }
+
+  .contact__field input,
+  .contact__field textarea {
+    width: 100%;
+    padding: 0.55rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    border-radius: 0;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: var(--step-0);
+    font-weight: 400;
+    transition: border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+  }
+
+  .contact__field textarea {
+    min-height: 7.5rem;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .contact__field input:focus-visible,
+  .contact__field textarea:focus-visible {
+    outline: none;
+    border-bottom-color: var(--accent);
+    box-shadow: 0 1px 0 var(--accent);
+  }
+
+  .contact__send {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-m);
+    align-items: center;
+  }
+
+  .contact__send button:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  .contact__privacy {
+    max-width: 22rem;
+    color: var(--fg-muted);
+    font-size: var(--step--1);
+  }
+
+  .contact__status {
+    min-height: 1.5em;
+    font-size: var(--step--1);
+  }
+
+  .contact__status[data-state='success'] {
+    color: var(--accent);
+  }
+
+  .contact__trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  /* Ben's dock: rides along the bottom of the screen beside the form, rests on the footer rule. */
+  .contact__ground {
+    position: sticky;
+    bottom: 0;
+    height: 0;
+    margin-top: var(--space-xl);
   }
 
   .contact__foot {
@@ -75,7 +252,6 @@ const year = new Date().getFullYear();
     gap: var(--space-2xs) var(--space-s);
     align-items: baseline;
     justify-content: space-between;
-    margin-top: var(--space-xl);
     padding-top: var(--space-m);
     border-top: 1px solid var(--rule);
     color: var(--fg-muted);
@@ -89,6 +265,21 @@ const year = new Date().getFullYear();
   @media (min-width: 30rem) {
     .contact__foot {
       column-gap: var(--space-l);
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .contact__pair {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* Desktop: text and form side by side, the right edge stays free for Ben. */
+  @media (min-width: 62rem) {
+    .contact__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+      gap: var(--space-xl);
+      padding-right: 170px;
     }
   }
 </style>
