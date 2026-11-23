@@ -204,6 +204,28 @@ export const projectCategories = {
 
 export const personalProjects: Reference[] = [
   {
+    id: 'ronin',
+    name: 'RŌNIN',
+    // Use https://ronin.braendle.tech/ once its Cloudflare deployment is live.
+    url: 'https://github.com/BWizard06/Ronin',
+    visitLabel: { de: 'Auf GitHub ansehen', en: 'View on GitHub' },
+    image: '/images/ronin-cover.webp',
+    imageWidth: 1600,
+    imageHeight: 900,
+    alt: {
+      de: 'Das RŌNIN-Katana mit polierter Klinge und schwarzer Saya vor einem roten Schriftzug',
+      en: 'The RŌNIN katana with a polished blade and black saya in front of red lettering',
+    },
+    role: { de: 'Interaktives 3D-Erlebnis', en: 'Interactive 3D experience' },
+    body: {
+      de: 'Meine Faszination für Japan und das Katana, als interaktives 3D-Erlebnis umgesetzt. Scrollen bewegt Schwert, Landschaften und Typografie; Details, Materialien und Geschichte lassen sich direkt erkunden.',
+      en: 'My fascination with Japan and the katana, turned into an interactive 3D experience. Scrolling moves the sword, landscapes and typography; details, materials and history invite closer exploration.',
+    },
+    bullets: [],
+    tags: ['Astro', 'TypeScript', 'Three.js', 'Tailwind CSS', 'Blender', 'Tripo', 'Codex'],
+    say: { de: 'Japanisches Handwerk in einer interaktiven 3D-Welt.', en: 'Japanese craftsmanship in an interactive 3D world.' },
+  },
+  {
     id: 'lacuna',
     name: 'LACUNA',
     url: 'https://lacuna.braendle.tech/',
