@@ -206,9 +206,8 @@ export const personalProjects: Reference[] = [
   {
     id: 'ronin',
     name: 'RŌNIN',
-    // Use https://ronin.braendle.tech/ once its Cloudflare deployment is live.
-    url: 'https://github.com/BWizard06/Ronin',
-    visitLabel: { de: 'Auf GitHub ansehen', en: 'View on GitHub' },
+    url: 'https://ronin.braendle.tech/',
+    source: 'https://github.com/BWizard06/Ronin',
     image: '/images/ronin-cover.webp',
     imageWidth: 1600,
     imageHeight: 900,
